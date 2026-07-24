@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>작업 기록 — 오늘의 할일 앱</title>
+<style>
+  :root {
+    --ink: #1c1f2e;
+    --paper: #f3f4fa;
+    --paper-raised: #ffffff;
+    --muted: #6b7089;
+    --line: #dcdfec;
+    --accent: #4c5bdb;
+    --accent-soft: #e8eaff;
+    --warn: #b5650a;
+    --warn-soft: #fbeee0;
+    --good: #157a4a;
+    --good-soft: #e5f3ec;
+    --font-display: Georgia, "Iowan Old Style", "Noto Serif KR", serif;
+    --font-body: "Segoe UI", "Apple SD Gothic Neo", Roboto, "Malgun Gothic", sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Consolas, "Nanum Gothic Coding", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e7e8f5;
+      --paper: #14151f;
+      --paper-raised: #1b1d2a;
+      --muted: #9498b3;
+      --line: #2b2d40;
+      --accent: #8d97ff;
+      --accent-soft: #23264a;
+      --warn: #e0a458;
+      --warn-soft: #332412;
+      --good: #4fbf8b;
+      --good-soft: #123024;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e7e8f5;
+    --paper: #14151f;
+    --paper-raised: #1b1d2a;
+    --muted: #9498b3;
+    --line: #2b2d40;
+    --accent: #8d97ff;
+    --accent-soft: #23264a;
+    --warn: #e0a458;
+    --warn-soft: #332412;
+    --good: #4fbf8b;
+    --good-soft: #123024;
+  }
+  :root[data-theme="light"] {
+    --ink: #1c1f2e;
+    --paper: #f3f4fa;
+    --paper-raised: #ffffff;
+    --muted: #6b7089;
+    --line: #dcdfec;
+    --accent: #4c5bdb;
+    --accent-soft: #e8eaff;
+    --warn: #b5650a;
+    --warn-soft: #fbeee0;
+    --good: #157a4a;
+    --good-soft: #e5f3ec;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  body {
+    padding: 56px 20px 80px;
+    display: flex;
+    justify-content: center;
+  }
+  .page {
+    width: 100%;
+    max-width: 760px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  .lede {
+    font-size: 15.5px;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0 0 24px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 48px;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 9px;
+  }
+  .chip a { color: inherit; text-decoration: none; }
+  .chip a:hover { color: var(--accent); }
+
+  .timeline {
+    position: relative;
+    padding-left: 34px;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--line);
+  }
+
+  .entry {
+    position: relative;
+    padding-bottom: 44px;
+  }
+  .entry:last-child { padding-bottom: 0; }
+  .entry::before {
+    content: attr(data-step);
+    position: absolute;
+    left: -34px;
+    top: 2px;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .entry.paused::before {
+    border-style: dashed;
+    color: var(--muted);
+    border-color: var(--muted);
+  }
+
+  .entry-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .entry h2 {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  .tag.status-done { color: var(--good); }
+  .tag.status-paused { color: var(--muted); }
+
+  .entry p {
+    font-size: 14.5px;
+    line-height: 1.75;
+    margin: 0 0 10px;
+    max-width: 64ch;
+  }
+  .entry p:last-of-type { margin-bottom: 0; }
+
+  .files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0;
+  }
+  .files .chip { font-size: 11.5px; }
+
+  .callout {
+    margin-top: 14px;
+    border-left: 3px solid var(--warn);
+    background: var(--warn-soft);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+  }
+  .callout .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--warn);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .callout p {
+    font-size: 13.5px;
+    color: var(--ink);
+    margin: 0;
+    max-width: none;
+  }
+  .callout p + p { margin-top: 6px; }
+
+  .verify {
+    margin-top: 14px;
+    border-left: 3px solid var(--good);
+    background: var(--good-soft);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+  }
+  .verify .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--good);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .verify p {
+    font-size: 13.5px;
+    margin: 0;
+    max-width: none;
+  }
+
+  .summary {
+    margin-top: 56px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+  .summary h2 {
+    font-family: var(--font-display);
+    font-size: 21px;
+    margin: 0 0 6px;
+  }
+  .summary .lede {
+    margin-bottom: 20px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    min-width: 560px;
+  }
+  thead th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--paper-raised);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.what { color: var(--ink); font-weight: 600; width: 24%; }
+  td.why { color: var(--muted); width: 30%; }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 480px) {
+    .timeline { padding-left: 26px; }
+    .entry::before { left: -26px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow">session log · todo app</div>
+  <h1>오늘의 할일 앱, 만들면서 있었던 일</h1>
+  <p class="lede">
+    한 세션 안에서 진행된 작업을 순서대로 정리한 기록입니다. 잘된 부분뿐 아니라
+    중간에 놓쳤다가 되짚어 고친 부분도 그대로 남겼습니다.
+  </p>
+  <div class="meta-row">
+    <span class="chip">2026-07-24</span>
+    <span class="chip">index.html</span>
+    <span class="chip">tomorrow.html</span>
+    <span class="chip"><a href="https://github.com/9758025sobi2000/-.git">github.com/9758025sobi2000/-</a></span>
+  </div>
+
+  <div class="timeline">
+
+    <div class="entry" data-step="1">
+      <div class="entry-head">
+        <h2>오늘의 할일 앱 (index.html)</h2>
+        <span class="tag status-done">완료</span>
+      </div>
+      <p>
+        localStorage에 날짜별 키(<code>todo-app-YYYY-MM-DD</code>)로 저장하는 단일 HTML 파일로 시작.
+        할일 추가·완료 체크·삭제·진행률 바를 기본 기능으로 구현했습니다.
+      </p>
+      <div class="files">
+        <span class="chip">index.html</span>
+      </div>
+      <div class="verify">
+        <div class="label">확인</div>
+        <p>브라우저에서 항목 추가 → 1/1, 체크 → 100%까지 실제 클릭으로 동작을 확인.</p>
+      </div>
+    </div>
+
+    <div class="entry" data-step="2">
+      <div class="entry-head">
+        <h2>내일의 할일 앱 (tomorrow.html)</h2>
+        <span class="tag status-done">완료</span>
+      </div>
+      <p>
+        같은 구조를 오렌지 톤으로 복제해 오늘 날짜 +1일을 계산하는 페이지로 만들고,
+        두 페이지를 서로 이동할 수 있는 링크로 연결했습니다.
+      </p>
+      <div class="files">
+        <span class="chip">tomorrow.html</span>
+        <span class="chip">index.html (nav 추가)</span>
+      </div>
+      <div class="callout">
+        <div class="label">실수</div>
+        <p>
+          tomorrow.html에 이동 링크를 넣으면서 index.html에도 같은 링크를 추가했는데,
+          정작 index.html에는 <code>.nav</code> 스타일 자체가 없었습니다. 링크가 스타일 없이
+          떠 있는 상태로 남을 뻔했고, 바로 다음 수정에서 CSS를 추가해 맞췄습니다.
+        </p>
+      </div>
+    </div>
+
+    <div class="entry paused" data-step="·">
+      <div class="entry-head">
+        <h2>자기소개 페이지</h2>
+        <span class="tag status-paused">중단</span>
+      </div>
+      <p>
+        화려한 포트폴리오 스타일로 만들기로 방향까지 정했으나, 실제 작업을 시작하기 전에
+        사용자가 요청을 달력·검색 기능으로 전환했습니다. 결과물 없이 다음 단계로 넘어감.
+      </p>
+    </div>
+
+    <div class="entry" data-step="3">
+      <div class="entry-head">
+        <h2>달력 보기 + 검색 기능</h2>
+        <span class="tag status-done">완료</span>
+      </div>
+      <p>
+        index.html을 날짜 고정형에서 벗어나게 재작성. 월간 달력에서 날짜를 클릭하면
+        그 날짜의 할일로 바로 전환되고(할일이 있는 날엔 점 표시), 검색창에 입력하면
+        모든 날짜를 통틀어 실시간으로 찾아 날짜 배지와 함께 보여줍니다.
+      </p>
+      <div class="files">
+        <span class="chip">index.html (재작성)</span>
+      </div>
+      <div class="callout">
+        <div class="label">실수</div>
+        <p>
+          날짜 라벨을 그리는 코드에 조건식을 잘못 이어 붙였다가, 바로 다음 줄에서 같은 변수를
+          덮어써 버리는 죽은 코드를 남겼습니다. 파일을 다시 훑어보다가 발견해서 삭제.
+        </p>
+        <p>
+          "오늘로" 버튼 핸들러에도 같은 종류의 실수가 있었습니다. 달력을 <code>display:none</code>으로
+          닫아놓고 바로 다음 줄에서 "닫혀있지 않으면 다시 그려라"라는, 항상 거짓이 되는
+          조건을 넣어뒀던 것도 같이 정리했습니다.
+        </p>
+      </div>
+      <div class="verify">
+        <div class="label">확인</div>
+        <p>
+          달력에서 다른 날짜 클릭 → 해당 날짜 데이터로 전환, "사기" 검색 → 두 날짜의 항목이
+          날짜순으로 함께 뜨는 것까지 실제 클릭·입력으로 확인.
+        </p>
+      </div>
+    </div>
+
+    <div class="entry" data-step="4">
+      <div class="entry-head">
+        <h2>Git 저장소 초기화 &amp; 첫 푸시</h2>
+        <span class="tag status-done">완료</span>
+      </div>
+      <p>
+        빈 GitHub 저장소에 처음 커밋하고 푸시하는 작업. 로컬/전역 어디에도 git 사용자
+        정보가 없어서, 임의로 설정하지 않고 사용자에게 어떤 이름·이메일을 쓸지 먼저 물어본
+        뒤 진행했습니다.
+      </p>
+      <div class="files">
+        <span class="chip">.gitignore</span>
+        <span class="chip">git init / commit / push</span>
+      </div>
+      <div class="callout">
+        <div class="label">주의해서 넘어간 부분</div>
+        <p>
+          작업 폴더에 Claude Code 도구가 만든 <code>.claude/settings.local.json</code>이
+          추적되지 않은 파일로 같이 잡혔습니다. 프로젝트와 무관한 로컬 도구 설정이라
+          커밋에 넣지 않고, <code>.gitignore</code>를 만들어 제외한 뒤 나머지만 커밋했습니다.
+        </p>
+      </div>
+      <div class="verify">
+        <div class="label">확인</div>
+        <p><code>main</code> 브랜치로 새 브랜치 푸시 완료, 3개 파일(index.html, tomorrow.html, .gitignore) 반영.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="summary">
+    <h2>실수 요약</h2>
+    <p class="lede">전부 사용자가 지적하기 전에 자체적으로 발견해 고친 것들입니다.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>무엇을</th>
+            <th>왜 생겼나</th>
+            <th>어떻게 바로잡았나</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="what">index.html에 nav 스타일 누락</td>
+            <td class="why">tomorrow.html 기준으로 링크만 복사하고 스타일 정의는 옮기지 않음</td>
+            <td>index.html에 <code>.nav</code> CSS 블록을 추가로 삽입</td>
+          </tr>
+          <tr>
+            <td class="what">날짜 라벨에 죽은 코드</td>
+            <td class="why">조건식을 먼저 써두고, 바로 다음 줄에서 같은 변수를 무조건 덮어씀</td>
+            <td>파일 재검토 중 발견해 불필요한 줄 삭제</td>
+          </tr>
+          <tr>
+            <td class="what">"오늘로" 버튼의 항상-거짓 조건</td>
+            <td class="why">달력을 닫은 직후 "닫혀있지 않으면"을 검사해 절대 실행 안 됨</td>
+            <td>의미 없는 조건문 제거</td>
+          </tr>
+          <tr>
+            <td class="what">git 사용자 정보 없음</td>
+            <td class="why">이 컴퓨터에 git이 처음 설치·사용되는 상태였음</td>
+            <td>임의 설정 대신 사용자에게 이름·이메일을 먼저 확인</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <span>작성: 세션 내 자동 기록</span>
+    <span>2026-07-24</span>
+  </footer>
+</div>
+</body>
+</html>
