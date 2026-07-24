@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내일의 할일</title>
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --text: #1f2333;
+    --muted: #8a8fa3;
+    --accent: #ff8a5b;
+    --accent-soft: #ffece2;
+    --danger: #ff5b6b;
+    --border: #e7e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #fff1ea 0%, #f5f6fa 40%);
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+  }
+  .nav {
+    margin-bottom: 12px;
+  }
+  .nav a {
+    color: var(--muted);
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .nav a:hover {
+    text-decoration: underline;
+  }
+  header {
+    margin-bottom: 20px;
+  }
+  header .date {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 26px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(70, 80, 150, 0.08);
+  }
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .progress-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-bar > div {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  form input[type="text"] {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 15px;
+    outline: none;
+    background: #fafbfe;
+  }
+  form input[type="text"]:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  form button {
+    border: none;
+    background: var(--accent);
+    color: white;
+    padding: 0 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  form button:hover { opacity: 0.9; }
+  ul#list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  li.task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #fff;
+  }
+  li.task.done {
+    background: #fafafc;
+  }
+  li.task .check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    color: white;
+    font-size: 13px;
+  }
+  li.task.done .check {
+    background: var(--accent);
+  }
+  li.task .text {
+    flex: 1;
+    font-size: 15px;
+    word-break: break-word;
+  }
+  li.task.done .text {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+  li.task .del {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px;
+  }
+  li.task .del:hover { color: var(--danger); }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 30px 0;
+    font-size: 14px;
+  }
+  footer {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  footer button {
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="nav"><a href="index.html">← 오늘의 할일로 이동</a></div>
+    <header>
+      <div class="date" id="today"></div>
+      <h1>내일의 할일</h1>
+    </header>
+
+    <div class="card">
+      <div class="progress-row">
+        <span id="progressText">0 / 0 완료</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar"><div id="progressFill"></div></div>
+
+      <form id="form">
+        <input type="text" id="input" placeholder="내일 할 일을 입력하세요" autocomplete="off" maxlength="200" />
+        <button type="submit">추가</button>
+      </form>
+
+      <ul id="list"></ul>
+      <div class="empty" id="empty" style="display:none;">아직 내일 할 일이 없어요. 하나 추가해보세요!</div>
+    </div>
+
+    <footer>
+      <button id="clearDone">완료한 항목 지우기</button>
+    </footer>
+  </div>
+
+<script>
+(function () {
+  const STORAGE_PREFIX = "todo-app-";
+
+  function targetDate() {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d;
+  }
+
+  function dateKey(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${STORAGE_PREFIX}${y}-${m}-${day}`;
+  }
+
+  function formatDate(d) {
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  }
+
+  const date = targetDate();
+  const key = dateKey(date);
+  const listEl = document.getElementById("list");
+  const emptyEl = document.getElementById("empty");
+  const formEl = document.getElementById("form");
+  const inputEl = document.getElementById("input");
+  const progressText = document.getElementById("progressText");
+  const progressPercent = document.getElementById("progressPercent");
+  const progressFill = document.getElementById("progressFill");
+  const clearDoneBtn = document.getElementById("clearDone");
+
+  document.getElementById("today").textContent = formatDate(date);
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function save(tasks) {
+    localStorage.setItem(key, JSON.stringify(tasks));
+  }
+
+  let tasks = load();
+
+  function render() {
+    listEl.innerHTML = "";
+    emptyEl.style.display = tasks.length === 0 ? "block" : "none";
+
+    tasks.forEach((task) => {
+      const li = document.createElement("li");
+      li.className = "task" + (task.done ? " done" : "");
+
+      const check = document.createElement("div");
+      check.className = "check";
+      check.textContent = task.done ? "✓" : "";
+      check.addEventListener("click", () => {
+        task.done = !task.done;
+        save(tasks);
+        render();
+      });
+
+      const text = document.createElement("div");
+      text.className = "text";
+      text.textContent = task.text;
+
+      const del = document.createElement("button");
+      del.className = "del";
+      del.textContent = "×";
+      del.addEventListener("click", () => {
+        tasks = tasks.filter((t) => t.id !== task.id);
+        save(tasks);
+        render();
+      });
+
+      li.appendChild(check);
+      li.appendChild(text);
+      li.appendChild(del);
+      listEl.appendChild(li);
+    });
+
+    const total = tasks.length;
+    const done = tasks.filter((t) => t.done).length;
+    const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+    progressText.textContent = `${done} / ${total} 완료`;
+    progressPercent.textContent = `${percent}%`;
+    progressFill.style.width = `${percent}%`;
+  }
+
+  formEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const value = inputEl.value.trim();
+    if (!value) return;
+    tasks.push({ id: Date.now() + Math.random(), text: value, done: false });
+    save(tasks);
+    inputEl.value = "";
+    render();
+  });
+
+  clearDoneBtn.addEventListener("click", () => {
+    tasks = tasks.filter((t) => !t.done);
+    save(tasks);
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

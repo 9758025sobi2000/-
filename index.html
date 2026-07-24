@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘의 할일</title>
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --text: #1f2333;
+    --muted: #8a8fa3;
+    --accent: #5b6bff;
+    --accent-soft: #eef0ff;
+    --danger: #ff5b6b;
+    --border: #e7e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #eef1ff 0%, #f5f6fa 40%);
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+  }
+  .nav {
+    margin-bottom: 12px;
+  }
+  .nav a {
+    color: var(--muted);
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .nav a:hover {
+    text-decoration: underline;
+  }
+  header {
+    margin-bottom: 20px;
+  }
+  header .date {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 26px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(70, 80, 150, 0.08);
+  }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .icon-btn {
+    border: 1px solid var(--border);
+    background: #fafbfe;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .icon-btn:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .icon-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .search-box {
+    margin-bottom: 12px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    outline: none;
+    background: #fafbfe;
+  }
+  .search-box input:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  .calendar {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  .cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .cal-header button {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 8px;
+  }
+  .cal-header button:hover {
+    background: var(--accent-soft);
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+  }
+  .cal-dow {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 4px 0;
+  }
+  .cal-day {
+    position: relative;
+    padding: 8px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .cal-day:hover {
+    background: var(--accent-soft);
+  }
+  .cal-day.blank {
+    cursor: default;
+  }
+  .cal-day.blank:hover {
+    background: transparent;
+  }
+  .cal-day.today {
+    border: 1px solid var(--accent);
+  }
+  .cal-day.selected {
+    background: var(--accent);
+    color: white;
+  }
+  .cal-day .dot {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .cal-day.selected .dot {
+    background: white;
+  }
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .progress-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-bar > div {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  form input[type="text"] {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 15px;
+    outline: none;
+    background: #fafbfe;
+  }
+  form input[type="text"]:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  form button {
+    border: none;
+    background: var(--accent);
+    color: white;
+    padding: 0 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  form button:hover { opacity: 0.9; }
+  ul#list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  li.task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #fff;
+  }
+  li.task.done {
+    background: #fafafc;
+  }
+  li.task .check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    color: white;
+    font-size: 13px;
+  }
+  li.task.done .check {
+    background: var(--accent);
+  }
+  li.task .text {
+    flex: 1;
+    font-size: 15px;
+    word-break: break-word;
+  }
+  li.task.done .text {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+  li.task .result-date {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--accent-soft);
+    padding: 2px 6px;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  li.task .del {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px;
+  }
+  li.task .del:hover { color: var(--danger); }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 30px 0;
+    font-size: 14px;
+  }
+  footer {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  footer button {
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="nav"><a href="tomorrow.html">내일의 할일로 이동 →</a></div>
+    <header>
+      <div class="date" id="dateLabel"></div>
+      <h1 id="pageTitle">오늘의 할일</h1>
+    </header>
+
+    <div class="card">
+      <div class="toolbar">
+        <button class="icon-btn" id="calendarToggle">📅 달력</button>
+        <button class="icon-btn" id="todayBtn">오늘로</button>
+      </div>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 모든 날짜에서 할일 검색" autocomplete="off" />
+      </div>
+
+      <div class="calendar" id="calendar" style="display:none;">
+        <div class="cal-header">
+          <button type="button" id="prevMonth">‹</button>
+          <span id="calTitle"></span>
+          <button type="button" id="nextMonth">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <div id="progressSection">
+        <div class="progress-row">
+          <span id="progressText">0 / 0 완료</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar"><div id="progressFill"></div></div>
+      </div>
+
+      <form id="form">
+        <input type="text" id="input" placeholder="할 일을 입력하세요" autocomplete="off" maxlength="200" />
+        <button type="submit">추가</button>
+      </form>
+
+      <ul id="list"></ul>
+      <div class="empty" id="empty" style="display:none;"></div>
+    </div>
+
+    <footer>
+      <button id="clearDone">완료한 항목 지우기</button>
+    </footer>
+  </div>
+
+<script>
+(function () {
+  const STORAGE_PREFIX = "todo-app-";
+  const DOW = ["일", "월", "화", "수", "목", "금", "토"];
+
+  function dateKey(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+  function storageKey(d) {
+    return STORAGE_PREFIX + dateKey(d);
+  }
+  function formatDate(d) {
+    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${DOW[d.getDay()]})`;
+  }
+  function isSameDay(a, b) {
+    return dateKey(a) === dateKey(b);
+  }
+
+  const today = new Date();
+  let selectedDate = new Date();
+  let calendarViewDate = new Date();
+
+  const dateLabel = document.getElementById("dateLabel");
+  const pageTitle = document.getElementById("pageTitle");
+  const listEl = document.getElementById("list");
+  const emptyEl = document.getElementById("empty");
+  const formEl = document.getElementById("form");
+  const inputEl = document.getElementById("input");
+  const progressSection = document.getElementById("progressSection");
+  const progressText = document.getElementById("progressText");
+  const progressPercent = document.getElementById("progressPercent");
+  const progressFill = document.getElementById("progressFill");
+  const clearDoneBtn = document.getElementById("clearDone");
+  const searchInput = document.getElementById("searchInput");
+  const calendarToggle = document.getElementById("calendarToggle");
+  const todayBtn = document.getElementById("todayBtn");
+  const calendarEl = document.getElementById("calendar");
+  const calTitle = document.getElementById("calTitle");
+  const calGrid = document.getElementById("calGrid");
+  const prevMonthBtn = document.getElementById("prevMonth");
+  const nextMonthBtn = document.getElementById("nextMonth");
+
+  function loadTasks(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  function saveTasks(key, tasks) {
+    localStorage.setItem(key, JSON.stringify(tasks));
+  }
+  function allDateKeysWithTasks() {
+    const result = new Set();
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(STORAGE_PREFIX)) {
+        const tasks = loadTasks(k);
+        if (tasks.length > 0) result.add(k.slice(STORAGE_PREFIX.length));
+      }
+    }
+    return result;
+  }
+
+  function makeTaskLi(task, opts) {
+    const li = document.createElement("li");
+    li.className = "task" + (task.done ? " done" : "");
+
+    const check = document.createElement("div");
+    check.className = "check";
+    check.textContent = task.done ? "✓" : "";
+    check.addEventListener("click", () => {
+      const tasks = loadTasks(opts.key);
+      const t = tasks.find((x) => x.id === task.id);
+      if (t) t.done = !t.done;
+      saveTasks(opts.key, tasks);
+      render();
+    });
+
+    if (opts.dateLabelText) {
+      const badge = document.createElement("div");
+      badge.className = "result-date";
+      badge.textContent = opts.dateLabelText;
+      li.appendChild(check);
+      li.appendChild(badge);
+    } else {
+      li.appendChild(check);
+    }
+
+    const text = document.createElement("div");
+    text.className = "text";
+    text.textContent = task.text;
+    li.appendChild(text);
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.textContent = "×";
+    del.addEventListener("click", () => {
+      const tasks = loadTasks(opts.key).filter((t) => t.id !== task.id);
+      saveTasks(opts.key, tasks);
+      render();
+    });
+    li.appendChild(del);
+
+    return li;
+  }
+
+  function renderNormal() {
+    const isToday = isSameDay(selectedDate, today);
+    pageTitle.textContent = isToday ? "오늘의 할일" : "할일";
+    dateLabel.textContent = formatDate(selectedDate);
+
+    formEl.style.display = "flex";
+    progressSection.style.display = "block";
+
+    const key = storageKey(selectedDate);
+    const tasks = loadTasks(key);
+
+    listEl.innerHTML = "";
+    emptyEl.style.display = tasks.length === 0 ? "block" : "none";
+    emptyEl.textContent = "아직 할 일이 없어요. 하나 추가해보세요!";
+
+    tasks.forEach((task) => {
+      listEl.appendChild(makeTaskLi(task, { key }));
+    });
+
+    const total = tasks.length;
+    const done = tasks.filter((t) => t.done).length;
+    const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+    progressText.textContent = `${done} / ${total} 완료`;
+    progressPercent.textContent = `${percent}%`;
+    progressFill.style.width = `${percent}%`;
+  }
+
+  function renderSearch(query) {
+    pageTitle.textContent = "검색 결과";
+    formEl.style.display = "none";
+    progressSection.style.display = "none";
+
+    const q = query.trim().toLowerCase();
+    const matches = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(STORAGE_PREFIX)) continue;
+      const dk = k.slice(STORAGE_PREFIX.length);
+      const tasks = loadTasks(k);
+      tasks.forEach((task) => {
+        if (task.text.toLowerCase().includes(q)) {
+          matches.push({ key: k, dateKey: dk, task });
+        }
+      });
+    }
+    matches.sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+
+    dateLabel.textContent = `"${query}" 검색 결과 ${matches.length}건`;
+
+    listEl.innerHTML = "";
+    emptyEl.style.display = matches.length === 0 ? "block" : "none";
+    emptyEl.textContent = "일치하는 할일이 없어요.";
+
+    matches.forEach(({ key, dateKey: dk, task }) => {
+      const [y, m, d] = dk.split("-").map(Number);
+      const label = `${m}/${d}`;
+      listEl.appendChild(makeTaskLi(task, { key, dateLabelText: label }));
+    });
+  }
+
+  function render() {
+    const q = searchInput.value.trim();
+    if (q) renderSearch(q);
+    else renderNormal();
+  }
+
+  function renderCalendar() {
+    const year = calendarViewDate.getFullYear();
+    const month = calendarViewDate.getMonth();
+    calTitle.textContent = `${year}년 ${month + 1}월`;
+
+    const firstDay = new Date(year, month, 1);
+    const startWeekday = firstDay.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const withTasks = allDateKeysWithTasks();
+
+    calGrid.innerHTML = "";
+    DOW.forEach((d) => {
+      const el = document.createElement("div");
+      el.className = "cal-dow";
+      el.textContent = d;
+      calGrid.appendChild(el);
+    });
+
+    for (let i = 0; i < startWeekday; i++) {
+      const el = document.createElement("div");
+      el.className = "cal-day blank";
+      calGrid.appendChild(el);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cellDate = new Date(year, month, day);
+      const el = document.createElement("div");
+      let cls = "cal-day";
+      if (isSameDay(cellDate, today)) cls += " today";
+      if (isSameDay(cellDate, selectedDate)) cls += " selected";
+      el.className = cls;
+      el.textContent = day;
+      if (withTasks.has(dateKey(cellDate))) {
+        const dot = document.createElement("div");
+        dot.className = "dot";
+        el.appendChild(dot);
+      }
+      el.addEventListener("click", () => {
+        selectedDate = cellDate;
+        calendarEl.style.display = "none";
+        searchInput.value = "";
+        render();
+      });
+      calGrid.appendChild(el);
+    }
+  }
+
+  formEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const value = inputEl.value.trim();
+    if (!value) return;
+    const key = storageKey(selectedDate);
+    const tasks = loadTasks(key);
+    tasks.push({ id: Date.now() + Math.random(), text: value, done: false });
+    saveTasks(key, tasks);
+    inputEl.value = "";
+    render();
+  });
+
+  clearDoneBtn.addEventListener("click", () => {
+    const q = searchInput.value.trim();
+    if (q) return;
+    const key = storageKey(selectedDate);
+    const tasks = loadTasks(key).filter((t) => !t.done);
+    saveTasks(key, tasks);
+    render();
+  });
+
+  searchInput.addEventListener("input", render);
+
+  calendarToggle.addEventListener("click", () => {
+    const opening = calendarEl.style.display === "none";
+    calendarEl.style.display = opening ? "block" : "none";
+    calendarToggle.classList.toggle("active", opening);
+    if (opening) {
+      calendarViewDate = new Date(selectedDate);
+      renderCalendar();
+    }
+  });
+
+  todayBtn.addEventListener("click", () => {
+    selectedDate = new Date();
+    calendarViewDate = new Date();
+    searchInput.value = "";
+    calendarEl.style.display = "none";
+    calendarToggle.classList.remove("active");
+    render();
+  });
+
+  prevMonthBtn.addEventListener("click", () => {
+    calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() - 1, 1);
+    renderCalendar();
+  });
+  nextMonthBtn.addEventListener("click", () => {
+    calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() + 1, 1);
+    renderCalendar();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
