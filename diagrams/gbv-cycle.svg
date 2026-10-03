@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1500" viewBox="0 0 1400 1500" font-family="Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, WenQuanYi Zen Hei, sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5a5470"/></marker><filter id="sh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.15"/></filter><radialGradient id="cg"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#f1ecf8"/></radialGradient></defs>
+<rect width="1400" height="1500" fill="#fbfaf7"/>
+<text x="700.0" y="92" text-anchor="middle" font-size="46" font-weight="700" fill="#2b2540">젠더기반폭력을 만드는 성차별적 구조의 고리</text>
+<text x="700.0" y="140" text-anchor="middle" font-size="24" fill="#6b6580">각 요소가 서로를 만들고 강화하는 순환 구조 — 시작도 끝도 없다</text>
+<circle cx="700" cy="800" r="440" fill="none" stroke="#d9d3e6" stroke-width="34"/>
+<path d="M738.3,361.7 A440,440 0 0 1 1060.4,547.6" fill="none" stroke="#5a5470" stroke-width="12"/>
+<circle cx="920.0" cy="418.9" r="30" fill="#fbfaf7" stroke="#5a5470" stroke-width="4"/><polygon points="915.5,404.8 934.7,427.4 905.5,422.1 915.7,416.4" fill="#5a5470"/>
+<path d="M1098.8,614.0 A440,440 0 0 1 1098.8,986.0" fill="none" stroke="#5a5470" stroke-width="12"/>
+<circle cx="1140.0" cy="800.0" r="30" fill="#fbfaf7" stroke="#5a5470" stroke-width="4"/><polygon points="1150.0,789.0 1140.0,817.0 1130.0,789.0 1140.0,795.0" fill="#5a5470"/>
+<path d="M1060.4,1052.4 A440,440 0 0 1 738.3,1238.3" fill="none" stroke="#5a5470" stroke-width="12"/>
+<circle cx="920.0" cy="1181.1" r="30" fill="#fbfaf7" stroke="#5a5470" stroke-width="4"/><polygon points="934.5,1184.2 905.3,1189.6 924.5,1166.9 924.3,1178.6" fill="#5a5470"/>
+<path d="M661.7,1238.3 A440,440 0 0 1 339.6,1052.4" fill="none" stroke="#5a5470" stroke-width="12"/>
+<circle cx="480.0" cy="1181.1" r="30" fill="#fbfaf7" stroke="#5a5470" stroke-width="4"/><polygon points="484.5,1195.2 465.3,1172.6 494.5,1177.9 484.3,1183.6" fill="#5a5470"/>
+<path d="M301.2,986.0 A440,440 0 0 1 301.2,614.0" fill="none" stroke="#5a5470" stroke-width="12"/>
+<circle cx="260.0" cy="800.0" r="30" fill="#fbfaf7" stroke="#5a5470" stroke-width="4"/><polygon points="250.0,811.0 260.0,783.0 270.0,811.0 260.0,805.0" fill="#5a5470"/>
+<path d="M339.6,547.6 A440,440 0 0 1 661.7,361.7" fill="none" stroke="#5a5470" stroke-width="12"/>
+<circle cx="480.0" cy="418.9" r="30" fill="#fbfaf7" stroke="#5a5470" stroke-width="4"/><polygon points="465.5,415.8 494.7,410.4 475.5,433.1 475.7,421.4" fill="#5a5470"/>
+<circle cx="700" cy="800" r="190" fill="url(#cg)" stroke="#b9aed3" stroke-width="3" stroke-dasharray="8 8"/>
+<text x="700" y="760" text-anchor="middle" font-size="40" font-weight="700" fill="#2b2540">성차별적 구조</text>
+<text x="700" y="808" text-anchor="middle" font-size="24" font-weight="400" fill="#555">개인의 일탈이 아닌</text>
+<text x="700" y="842" text-anchor="middle" font-size="24" font-weight="400" fill="#555">사회 구조의 문제</text>
+<text x="700" y="892" text-anchor="middle" font-size="26" font-weight="700" fill="#7B4FBF">↻ 끊임없이 순환</text>
+<g filter="url(#sh)"><rect x="505.0" y="272.0" width="390" height="176" rx="22" fill="#fff" stroke="#7B4FBF" stroke-width="4"/></g>
+<rect x="505.0" y="272.0" width="390" height="80" rx="22" fill="#7B4FBF"/><rect x="505.0" y="330.0" width="390" height="22" fill="#7B4FBF"/>
+<text x="700.0" y="307.0" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">성역할 규범과</text>
+<text x="700.0" y="340.0" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">성별 고정관념</text>
+<text x="700.0" y="387.0" text-anchor="middle" font-size="20" fill="#3a3550">· '남성다움/여성다움'의 고정된 기대</text>
+<text x="700.0" y="423.0" text-anchor="middle" font-size="20" fill="#3a3550">· 주도·공격성 vs 순종·돌봄 역할 부여</text>
+<g filter="url(#sh)"><rect x="886.1" y="492.0" width="390" height="176" rx="22" fill="#fff" stroke="#B5468F" stroke-width="4"/></g>
+<rect x="886.1" y="492.0" width="390" height="80" rx="22" fill="#B5468F"/><rect x="886.1" y="550.0" width="390" height="22" fill="#B5468F"/>
+<text x="1081.1" y="527.0" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">성별 권력관계</text>
+<text x="1081.1" y="560.0" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">(불평등한 위계)</text>
+<text x="1081.1" y="607.0" text-anchor="middle" font-size="20" fill="#3a3550">· 자원·지위·의사결정권의 불균형</text>
+<text x="1081.1" y="643.0" text-anchor="middle" font-size="20" fill="#3a3550">· 통제와 지배를 '당연한 것'으로 인식</text>
+<g filter="url(#sh)"><rect x="886.1" y="932.0" width="390" height="176" rx="22" fill="#fff" stroke="#D9534F" stroke-width="4"/></g>
+<rect x="886.1" y="932.0" width="390" height="80" rx="22" fill="#D9534F"/><rect x="886.1" y="990.0" width="390" height="22" fill="#D9534F"/>
+<text x="1081.1" y="984.0" text-anchor="middle" font-size="29" font-weight="700" fill="#fff">왜곡된 성문화</text>
+<text x="1081.1" y="1047.0" text-anchor="middle" font-size="20" fill="#3a3550">· 성적 대상화·성 상품화</text>
+<text x="1081.1" y="1083.0" text-anchor="middle" font-size="20" fill="#3a3550">· 강간 통념, 남성 연대·침묵의 문화</text>
+<g filter="url(#sh)"><rect x="505.0" y="1152.0" width="390" height="176" rx="22" fill="#fff" stroke="#E07B2E" stroke-width="4"/></g>
+<rect x="505.0" y="1152.0" width="390" height="80" rx="22" fill="#E07B2E"/><rect x="505.0" y="1210.0" width="390" height="22" fill="#E07B2E"/>
+<text x="700.0" y="1204.0" text-anchor="middle" font-size="29" font-weight="700" fill="#fff">폭력의 용인·묵인</text>
+<text x="700.0" y="1267.0" text-anchor="middle" font-size="20" fill="#3a3550">· 피해자 비난, 2차 피해</text>
+<text x="700.0" y="1303.0" text-anchor="middle" font-size="20" fill="#3a3550">· 가해의 축소·사소화, 낮은 처벌</text>
+<g filter="url(#sh)"><rect x="123.9" y="932.0" width="390" height="176" rx="22" fill="#fff" stroke="#C0392B" stroke-width="4"/></g>
+<rect x="123.9" y="932.0" width="390" height="80" rx="22" fill="#C0392B"/><rect x="123.9" y="990.0" width="390" height="22" fill="#C0392B"/>
+<text x="318.9" y="967.0" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">젠더기반폭력</text>
+<text x="318.9" y="1000.0" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">발생</text>
+<text x="318.9" y="1047.0" text-anchor="middle" font-size="20" fill="#3a3550">· 성폭력·가정폭력·교제폭력</text>
+<text x="318.9" y="1083.0" text-anchor="middle" font-size="20" fill="#3a3550">· 스토킹·디지털 성범죄 등</text>
+<g filter="url(#sh)"><rect x="123.9" y="492.0" width="390" height="176" rx="22" fill="#fff" stroke="#4A6FB5" stroke-width="4"/></g>
+<rect x="123.9" y="492.0" width="390" height="80" rx="22" fill="#4A6FB5"/><rect x="123.9" y="550.0" width="390" height="22" fill="#4A6FB5"/>
+<text x="318.9" y="527.0" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">성차별 구조의</text>
+<text x="318.9" y="560.0" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">재생산·강화</text>
+<text x="318.9" y="607.0" text-anchor="middle" font-size="20" fill="#3a3550">· 피해자의 위축·침묵, 참여 제한</text>
+<text x="318.9" y="643.0" text-anchor="middle" font-size="20" fill="#3a3550">· 기존 규범과 권력 구조의 고착화</text>
+<text x="700.0" y="1438" text-anchor="middle" font-size="19" fill="#8a8499">근거: UN 「여성폭력철폐선언」(1993) — 여성폭력은 남녀 간 역사적으로 불평등한 권력관계의 표현 / CEDAW 일반권고 제35호(2017)</text>
+<text x="700.0" y="1468" text-anchor="middle" font-size="19" fill="#8a8499">— 젠더기반폭력은 성 고정관념·남성 특권 이데올로기·사회 규범 등 성별 관련 요인에 뿌리를 두며 이를 유지시키는 수단으로 작동</text>
+</svg>
