@@ -1,0 +1,596 @@
+<title>교원 참석 확인</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 행정 공문 대장 느낌 — 상단 기관 헤더, 탭 3개(응답/일정관리/집계), 단일 컬럼 카드 목록 */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --sunken: #e9edf3;
+  --ink: #17212c;
+  --muted: #5d6b7c;
+  --line: #d6dde6;
+  --accent: #1d4f86;
+  --accent-soft: #e2ebf6;
+  --on-accent: #ffffff;
+  --yes: #1f7a4d;
+  --yes-soft: #def2e7;
+  --no: #b23a3a;
+  --no-soft: #f8e1e1;
+  --warn: #8a5a00;
+  --warn-soft: #fbefd5;
+  --t-meet: #1d4f86;
+  --t-event: #7a3f8f;
+  --t-trip: #2c6e6a;
+  --f-display: "Noto Serif KR", "Nanum Myeongjo", serif;
+  --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161d; --surface: #19212b; --sunken: #222c38; --ink: #e6ebf1; --muted: #9aa8b8; --line: #2f3b49;
+    --accent: #7fb0e6; --accent-soft: #1f3247; --on-accent: #0d1620;
+    --yes: #6fd19e; --yes-soft: #173528; --no: #f08c8c; --no-soft: #3d1f22; --warn: #e8bd6a; --warn-soft: #3a2e15;
+    --t-meet: #7fb0e6; --t-event: #cf9ae0; --t-trip: #7fcfc8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161d; --surface: #19212b; --sunken: #222c38; --ink: #e6ebf1; --muted: #9aa8b8; --line: #2f3b49;
+  --accent: #7fb0e6; --accent-soft: #1f3247; --on-accent: #0d1620;
+  --yes: #6fd19e; --yes-soft: #173528; --no: #f08c8c; --no-soft: #3d1f22; --warn: #e8bd6a; --warn-soft: #3a2e15;
+  --t-meet: #7fb0e6; --t-event: #cf9ae0; --t-trip: #7fcfc8;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 920px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
+header.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+h1 { font-family: var(--f-display); font-size: 28px; margin: 2px 0 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font-size: 17px; margin: 0; text-wrap: balance; }
+.who { font-size: 13px; color: var(--muted); text-align: right; }
+.who b { color: var(--ink); font-weight: 600; }
+.role { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 600; margin-left: 6px; }
+nav.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+nav.tabs button { appearance: none; border: 0; background: none; font: inherit; font-weight: 600; color: var(--muted); padding: 10px 14px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; }
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+label.f { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--muted); min-width: 0; }
+label.f .req { color: var(--no); }
+input, select, textarea { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; width: 100%; min-width: 0; }
+textarea { resize: vertical; min-height: 64px; }
+.span2 { grid-column: 1 / -1; }
+.btn { appearance: none; font: inherit; font-weight: 600; font-size: 14px; border-radius: 6px; padding: 8px 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.danger { color: var(--no); border-color: var(--no); }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { appearance: none; font: inherit; font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.list { display: grid; gap: 12px; }
+.ev { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--tc, var(--accent)); border-radius: 8px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.ev[data-type="회의"] { --tc: var(--t-meet); }
+.ev[data-type="행사"] { --tc: var(--t-event); }
+.ev[data-type="출장"] { --tc: var(--t-trip); }
+.ev-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; justify-content: space-between; }
+.type { font-size: 12px; font-weight: 700; color: var(--tc); border: 1px solid var(--tc); border-radius: 4px; padding: 0 6px; margin-right: 8px; }
+.ev h3 { margin: 0; font-size: 17px; display: inline; }
+.meta { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 14px; margin: 0; }
+.meta dt { color: var(--muted); font-size: 13px; }
+.meta dd { margin: 0; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
+.pill { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.yes { background: var(--yes-soft); color: var(--yes); }
+.pill.no { background: var(--no-soft); color: var(--no); }
+.pill.wait { background: var(--sunken); color: var(--muted); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { appearance: none; font: inherit; font-weight: 600; border: 0; background: var(--surface); color: var(--muted); padding: 8px 18px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"][data-v="참석"] { background: var(--yes); color: var(--surface); }
+.seg button[aria-pressed="true"][data-v="불참"] { background: var(--no); color: var(--surface); }
+.seg button:disabled { cursor: not-allowed; opacity: .6; }
+.saved { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.empty { text-align: center; padding: 32px 16px; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; }
+.empty strong { display: block; color: var(--ink); margin-bottom: 4px; }
+.notice { padding: 10px 14px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); font-size: 14px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 6px; font-size: 14px; z-index: 20; max-width: calc(100% - 32px); }
+.sum { display: grid; gap: 10px; }
+.sum-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 260px) auto; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: pointer; text-align: left; font: inherit; color: inherit; width: 100%; }
+.sum-row[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.sum-row .t { min-width: 0; }
+.sum-row .t small { display: block; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.bar { display: flex; height: 10px; border-radius: 999px; background: var(--sunken); overflow: hidden; }
+.bar i { display: block; }
+.bar .y { background: var(--yes); }
+.bar .n { background: var(--no); }
+.nums { font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nums .y { color: var(--yes); } .nums .n { color: var(--no); }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--sunken); font-size: 12px; letter-spacing: .04em; color: var(--muted); font-weight: 700; white-space: nowrap; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.stat { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.stat span { display: block; font-size: 12px; color: var(--muted); font-weight: 600; }
+.stat b { font-family: var(--f-mono); font-size: 22px; font-variant-numeric: tabular-nums; }
+.stat.y b { color: var(--yes); } .stat.n b { color: var(--no); }
+.confirm { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--no); }
+@media (max-width: 560px) {
+  .sum-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .sum-row .bar { grid-column: 1 / -1; order: 3; }
+  .who { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">단과대학 행정실 · 회의 · 행사 · 출장</div>
+      <h1>교원 참석 확인</h1>
+    </div>
+    <div class="who" id="who">접속 정보를 확인하는 중입니다</div>
+  </header>
+
+  <div class="notice" id="offline" hidden>저장소에 연결되지 않았습니다. claude.ai에 로그인한 상태에서 이 페이지를 열어야 응답을 제출하고 결과를 볼 수 있습니다.</div>
+
+  <nav class="tabs" role="tablist" aria-label="화면 전환">
+    <button role="tab" id="tab-respond" aria-selected="true" data-tab="respond">참석 응답</button>
+    <button role="tab" id="tab-manage" aria-selected="false" data-tab="manage" hidden>일정 관리</button>
+    <button role="tab" id="tab-results" aria-selected="false" data-tab="results" hidden>결과 집계</button>
+  </nav>
+
+  <!-- 참석 응답 -->
+  <section id="view-respond" class="list" style="gap:20px">
+    <form class="panel" id="profile-form" autocomplete="on">
+      <div class="panel-head">
+        <h2>응답자 인적사항</h2>
+        <span class="saved" id="profile-saved"></span>
+      </div>
+      <p class="hint">한 번 저장하면 모든 응답에 함께 기록됩니다. 성명과 소속은 필수입니다.</p>
+      <div class="grid">
+        <label class="f">성명 <span class="req" aria-hidden="true">*</span><input id="p-name" name="name" required maxlength="30" placeholder="홍길동"></label>
+        <label class="f">소속 학과(전공) <span class="req" aria-hidden="true">*</span><input id="p-dept" name="dept" required maxlength="40" placeholder="예: 기계공학과"></label>
+        <label class="f">직위
+          <select id="p-pos" name="pos">
+            <option value="">선택</option>
+            <option>교수</option><option>부교수</option><option>조교수</option>
+            <option>강의전담교수</option><option>연구교수</option><option>초빙교수</option>
+            <option>겸임교수</option><option>명예교수</option><option>기타</option>
+          </select>
+        </label>
+        <label class="f">연락처(선택)<input id="p-phone" name="phone" maxlength="20" inputmode="tel" placeholder="내선 또는 휴대전화"></label>
+      </div>
+      <div class="row"><button class="btn primary" type="submit" id="p-save">인적사항 저장</button></div>
+    </form>
+
+    <div class="panel-head">
+      <h2>응답할 일정</h2>
+      <div class="chips" id="filter-respond" role="group" aria-label="구분 필터"></div>
+    </div>
+    <div class="list" id="respond-list"></div>
+  </section>
+
+  <!-- 일정 관리 -->
+  <section id="view-manage" class="list" style="gap:20px" hidden>
+    <form class="panel" id="event-form">
+      <div class="panel-head">
+        <h2 id="event-form-title">새 일정 등록</h2>
+        <button type="button" class="btn small" id="ev-cancel" hidden>수정 취소</button>
+      </div>
+      <div class="grid">
+        <label class="f">구분 <span class="req" aria-hidden="true">*</span>
+          <select id="ev-type" required><option>회의</option><option>행사</option><option>출장</option></select>
+        </label>
+        <label class="f span2">명칭 <span class="req" aria-hidden="true">*</span><input id="ev-title" required maxlength="80" placeholder="예: 2026학년도 2학기 제3차 교수회의"></label>
+        <label class="f">날짜 <span class="req" aria-hidden="true">*</span><input id="ev-date" type="date" required></label>
+        <label class="f">시작 시간 <span class="req" aria-hidden="true">*</span><input id="ev-start" type="time" required></label>
+        <label class="f">종료 시간<input id="ev-end" type="time"></label>
+        <label class="f">회신 기한<input id="ev-deadline" type="date"></label>
+        <label class="f span2">장소 <span class="req" aria-hidden="true">*</span><input id="ev-place" required maxlength="80" placeholder="예: 공학관 3층 대회의실 / 세종컨벤션센터"></label>
+        <label class="f span2">안내 사항<textarea id="ev-note" maxlength="500" placeholder="준비물, 복장, 출장비 정산 안내 등"></textarea></label>
+      </div>
+      <div class="row"><button class="btn primary" type="submit" id="ev-save">일정 등록</button></div>
+    </form>
+
+    <div class="panel-head"><h2>등록된 일정</h2><span class="hint" id="manage-count"></span></div>
+    <div class="list" id="manage-list"></div>
+  </section>
+
+  <!-- 결과 집계 -->
+  <section id="view-results" class="list" style="gap:20px" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>일정별 응답 현황</h2>
+        <div class="row">
+          <button class="btn small" type="button" id="csv-btn">전체 결과 CSV 저장</button>
+          <button class="btn small" type="button" id="copy-btn">표 복사</button>
+        </div>
+      </div>
+      <div class="chips" id="filter-results" role="group" aria-label="구분 필터"></div>
+      <div class="sum" id="sum-list"></div>
+    </div>
+    <div class="panel" id="detail"></div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+  const TYPES = ["회의", "행사", "출장"];
+  const WD = ["일", "월", "화", "수", "목", "금", "토"];
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  const state = {
+    db: null, user: null, uid: null, admin: false, canWrite: true,
+    events: [], mine: null, all: [],
+    tab: "respond", fResp: "전체", fRes: "전체", selected: null,
+    drafts: {}, editing: null, confirmDel: null,
+  };
+
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2600);
+  }
+  function fmtDate(d) {
+    if (!d) return "";
+    const [y, m, day] = d.split("-").map(Number);
+    const w = WD[new Date(y, m - 1, day).getDay()];
+    return `${y}. ${m}. ${day}.(${w})`;
+  }
+  function fmtStamp(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const p = (n) => String(n).padStart(2, "0");
+    return `${d.getMonth() + 1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+  const today = () => { const d = new Date(); const p = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; };
+  const isClosed = (ev) => ev.closed || (ev.deadline && ev.deadline < today());
+  const timeText = (ev) => ev.end ? `${ev.start} ~ ${ev.end}` : ev.start;
+  const sortedEvents = () => [...state.events].sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+
+  /* ---------- tabs ---------- */
+  function setTab(tab) {
+    state.tab = tab;
+    document.querySelectorAll("nav.tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
+    ["respond", "manage", "results"].forEach((v) => ($("view-" + v).hidden = v !== tab));
+    try { localStorage.setItem("att-tab", tab); } catch (e) {}
+    render();
+  }
+  document.querySelectorAll("nav.tabs button").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.tab)));
+
+  function chips(el, current, onPick) {
+    el.innerHTML = ["전체", ...TYPES].map((t) => `<button type="button" class="chip" aria-pressed="${t === current}" data-t="${t}">${t}</button>`).join("");
+    el.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => onPick(b.dataset.t)));
+  }
+
+  /* ---------- profile ---------- */
+  function fillProfile() {
+    const p = state.mine?.profile;
+    if (!p) return;
+    if (document.activeElement?.closest("#profile-form")) return;
+    $("p-name").value = p.name || ""; $("p-dept").value = p.dept || "";
+    $("p-pos").value = p.pos || ""; $("p-phone").value = p.phone || "";
+    $("profile-saved").textContent = p.updatedAt ? `저장됨 ${fmtStamp(p.updatedAt)}` : "";
+  }
+  const hasProfile = () => !!(state.mine?.profile?.name && state.mine?.profile?.dept);
+
+  async function writeMine(patch) {
+    const ref = state.db.doc("responses/" + state.uid);
+    if (state.mine) await ref.update(patch);
+    else await ref.set({ answers: {}, ...patch });
+  }
+
+  $("profile-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!state.db || !state.uid) return toast("저장소에 연결된 뒤 다시 시도해 주세요.");
+    const profile = {
+      name: $("p-name").value.trim(), dept: $("p-dept").value.trim(),
+      pos: $("p-pos").value, phone: $("p-phone").value.trim(), updatedAt: new Date().toISOString(),
+    };
+    if (!profile.name || !profile.dept) return toast("성명과 소속 학과를 입력해 주세요.");
+    $("p-save").disabled = true;
+    try { await writeMine({ profile }); toast("인적사항을 저장했습니다."); }
+    catch (err) { handleWriteError(err); }
+    finally { $("p-save").disabled = false; }
+  });
+
+  /* ---------- respond view ---------- */
+  function renderRespond() {
+    chips($("filter-respond"), state.fResp, (t) => { state.fResp = t; renderRespond(); });
+    const list = $("respond-list");
+    const evs = sortedEvents().filter((e) => state.fResp === "전체" || e.type === state.fResp);
+    if (!state.events.length) {
+      list.innerHTML = `<div class="empty"><strong>등록된 회의·행사·출장이 아직 없습니다</strong>행정실에서 일정을 등록하면 이곳에 표시되고, 참석 또는 불참을 선택해 회신할 수 있습니다.</div>`;
+      return;
+    }
+    if (!evs.length) { list.innerHTML = `<div class="empty"><strong>${esc(state.fResp)} 일정이 없습니다</strong>다른 구분을 선택해 보세요.</div>`; return; }
+    const focusedId = document.activeElement?.closest?.(".ev")?.dataset.id;
+    if (focusedId && document.activeElement.tagName === "TEXTAREA") return; // 의견 입력 중에는 다시 그리지 않음
+    list.innerHTML = evs.map((ev) => {
+      const saved = state.mine?.answers?.[ev.id];
+      const d = state.drafts[ev.id] || {};
+      const status = d.status ?? saved?.status ?? "";
+      const comment = d.comment ?? saved?.comment ?? "";
+      const closed = isClosed(ev);
+      const dirty = state.drafts[ev.id] && (status !== (saved?.status ?? "") || comment !== (saved?.comment ?? ""));
+      const pill = saved ? `<span class="pill ${saved.status === "참석" ? "yes" : "no"}">${esc(saved.status)} 회신 완료</span>` : `<span class="pill wait">미회신</span>`;
+      return `<article class="ev" data-type="${esc(ev.type)}" data-id="${esc(ev.id)}">
+        <div class="ev-head">
+          <div><span class="type">${esc(ev.type)}</span><h3>${esc(ev.title)}</h3></div>
+          <div class="row">${closed ? `<span class="pill warn">회신 마감</span>` : ""}${pill}</div>
+        </div>
+        <dl class="meta">
+          <dt>일시</dt><dd>${fmtDate(ev.date)} ${esc(timeText(ev))}</dd>
+          <dt>장소</dt><dd>${esc(ev.place)}</dd>
+          ${ev.deadline ? `<dt>회신 기한</dt><dd>${fmtDate(ev.deadline)}까지</dd>` : ""}
+          ${ev.note ? `<dt>안내</dt><dd>${esc(ev.note)}</dd>` : ""}
+        </dl>
+        <div class="row">
+          <div class="seg" role="group" aria-label="참석 여부">
+            ${["참석", "불참"].map((v) => `<button type="button" data-v="${v}" aria-pressed="${status === v}" ${closed ? "disabled" : ""}>${v}</button>`).join("")}
+          </div>
+        </div>
+        <label class="f">의견 (선택)<textarea id="c-${esc(ev.id)}" maxlength="500" placeholder="불참 사유, 대리 참석자, 건의 사항 등" ${closed ? "disabled" : ""}>${esc(comment)}</textarea></label>
+        <div class="row">
+          <button type="button" class="btn primary small" data-act="submit" ${closed || !status || (!dirty && saved) ? "disabled" : ""}>${saved ? "응답 수정" : "응답 제출"}</button>
+          <span class="saved">${saved ? `최종 회신 ${fmtStamp(saved.at)}` : ""}${dirty ? " · 저장하지 않은 변경 사항이 있습니다" : ""}</span>
+        </div>
+      </article>`;
+    }).join("");
+    list.querySelectorAll(".ev").forEach((card) => {
+      const id = card.dataset.id;
+      card.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+        state.drafts[id] = { ...(state.drafts[id] || {}), status: b.dataset.v, comment: card.querySelector("textarea").value };
+        renderRespond();
+      }));
+      const ta = card.querySelector("textarea");
+      ta.addEventListener("input", () => {
+        const saved = state.mine?.answers?.[id];
+        state.drafts[id] = { status: state.drafts[id]?.status ?? saved?.status ?? "", comment: ta.value };
+        const btn = card.querySelector('[data-act="submit"]');
+        btn.disabled = !state.drafts[id].status;
+      });
+      ta.addEventListener("blur", () => setTimeout(renderRespond, 0));
+      card.querySelector('[data-act="submit"]').addEventListener("click", () => submitAnswer(id, card));
+    });
+  }
+
+  async function submitAnswer(id, card) {
+    if (!state.db || !state.uid) return toast("저장소에 연결된 뒤 다시 시도해 주세요.");
+    if (!hasProfile()) { toast("먼저 인적사항(성명·소속)을 저장해 주세요."); $("p-name").focus(); return; }
+    const saved = state.mine?.answers?.[id];
+    const status = state.drafts[id]?.status ?? saved?.status;
+    const comment = card.querySelector("textarea").value.trim();
+    if (!status) return toast("참석 또는 불참을 선택해 주세요.");
+    card.querySelector('[data-act="submit"]').disabled = true;
+    try {
+      await writeMine({ answers: { [id]: { status, comment, at: new Date().toISOString() } } });
+      delete state.drafts[id];
+      toast(`${status}(으)로 회신했습니다.`);
+      renderRespond();
+    } catch (err) { handleWriteError(err); renderRespond(); }
+  }
+
+  function handleWriteError(err) {
+    if (err?.code === "invalid_argument") { state.canWrite = false; toast("이 계정은 응답 권한이 없습니다. 행정실에 '참여자' 권한을 요청해 주세요."); }
+    else if (err?.code === "quota_exceeded") toast("저장 공간이 가득 찼습니다. 행정실에 문의해 주세요.");
+    else toast("저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+  }
+
+  /* ---------- manage view ---------- */
+  function resetEventForm() {
+    state.editing = null;
+    $("event-form").reset();
+    $("event-form-title").textContent = "새 일정 등록";
+    $("ev-save").textContent = "일정 등록";
+    $("ev-cancel").hidden = true;
+  }
+  $("ev-cancel").addEventListener("click", resetEventForm);
+  $("event-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!state.db) return toast("저장소에 연결된 뒤 다시 시도해 주세요.");
+    const ev = {
+      type: $("ev-type").value, title: $("ev-title").value.trim(), date: $("ev-date").value,
+      start: $("ev-start").value, end: $("ev-end").value, place: $("ev-place").value.trim(),
+      deadline: $("ev-deadline").value, note: $("ev-note").value.trim(),
+    };
+    if (ev.end && ev.end < ev.start) return toast("종료 시간이 시작 시간보다 빠릅니다.");
+    $("ev-save").disabled = true;
+    try {
+      if (state.editing) {
+        await state.db.doc("events/" + state.editing).update(ev);
+        toast("일정을 수정했습니다.");
+      } else {
+        await state.db.collection("events").add({ ...ev, closed: false, createdAt: new Date().toISOString() });
+        toast("일정을 등록했습니다. 교원 화면에 바로 표시됩니다.");
+      }
+      resetEventForm();
+    } catch (err) { toast(err?.code === "invalid_argument" ? "일정 등록은 편집자 권한이 필요합니다." : "저장하지 못했습니다. 잠시 후 다시 시도해 주세요."); }
+    finally { $("ev-save").disabled = false; }
+  });
+
+  function counts(evId) {
+    let y = 0, n = 0;
+    state.all.forEach((r) => { const s = r.answers?.[evId]?.status; if (s === "참석") y++; else if (s === "불참") n++; });
+    return { y, n, t: y + n };
+  }
+
+  function renderManage() {
+    const evs = sortedEvents();
+    $("manage-count").textContent = evs.length ? `총 ${evs.length}건` : "";
+    const list = $("manage-list");
+    if (!evs.length) { list.innerHTML = `<div class="empty"><strong>등록된 일정이 없습니다</strong>위 양식에 구분, 명칭, 날짜, 시간, 장소를 입력해 첫 일정을 등록하세요.</div>`; return; }
+    list.innerHTML = evs.map((ev) => {
+      const c = counts(ev.id);
+      return `<article class="ev" data-type="${esc(ev.type)}" data-id="${esc(ev.id)}">
+        <div class="ev-head">
+          <div><span class="type">${esc(ev.type)}</span><h3>${esc(ev.title)}</h3></div>
+          <div class="row">${isClosed(ev) ? `<span class="pill warn">회신 마감</span>` : `<span class="pill yes">회신 접수 중</span>`}<span class="nums"><span class="y">참석 ${c.y}</span> · <span class="n">불참 ${c.n}</span></span></div>
+        </div>
+        <dl class="meta">
+          <dt>일시</dt><dd>${fmtDate(ev.date)} ${esc(timeText(ev))}</dd>
+          <dt>장소</dt><dd>${esc(ev.place)}</dd>
+          ${ev.deadline ? `<dt>회신 기한</dt><dd>${fmtDate(ev.deadline)}</dd>` : ""}
+        </dl>
+        <div class="row">
+          <button type="button" class="btn small" data-act="edit">수정</button>
+          <button type="button" class="btn small" data-act="close">${ev.closed ? "회신 다시 열기" : "회신 마감"}</button>
+          <button type="button" class="btn small" data-act="view">결과 보기</button>
+          ${state.confirmDel === ev.id
+            ? `<span class="confirm">삭제하면 되돌릴 수 없습니다. <button type="button" class="btn small danger" data-act="del-yes">삭제</button><button type="button" class="btn small" data-act="del-no">취소</button></span>`
+            : `<button type="button" class="btn small danger" data-act="del">삭제</button>`}
+        </div>
+      </article>`;
+    }).join("");
+    list.querySelectorAll(".ev").forEach((card) => {
+      const id = card.dataset.id; const ev = state.events.find((x) => x.id === id);
+      card.querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", async () => {
+        const act = b.dataset.act;
+        if (act === "edit") {
+          state.editing = id;
+          $("ev-type").value = ev.type; $("ev-title").value = ev.title; $("ev-date").value = ev.date;
+          $("ev-start").value = ev.start; $("ev-end").value = ev.end || ""; $("ev-place").value = ev.place;
+          $("ev-deadline").value = ev.deadline || ""; $("ev-note").value = ev.note || "";
+          $("event-form-title").textContent = "일정 수정"; $("ev-save").textContent = "수정 내용 저장"; $("ev-cancel").hidden = false;
+          $("event-form").scrollIntoView({ behavior: "smooth", block: "start" }); $("ev-title").focus();
+        } else if (act === "close") {
+          b.disabled = true;
+          try { await state.db.doc("events/" + id).update({ closed: !ev.closed }); toast(ev.closed ? "회신을 다시 열었습니다." : "회신을 마감했습니다."); }
+          catch (e) { toast("변경하지 못했습니다."); b.disabled = false; }
+        } else if (act === "view") { state.selected = id; setTab("results"); }
+        else if (act === "del") { state.confirmDel = id; renderManage(); }
+        else if (act === "del-no") { state.confirmDel = null; renderManage(); }
+        else if (act === "del-yes") {
+          state.confirmDel = null;
+          try { await state.db.doc("events/" + id).delete(); toast("일정을 삭제했습니다."); if (state.editing === id) resetEventForm(); }
+          catch (e) { toast("삭제하지 못했습니다."); }
+        }
+      }));
+    });
+  }
+
+  /* ---------- results view ---------- */
+  function rowsFor(evId) {
+    return state.all
+      .filter((r) => r.answers?.[evId])
+      .map((r) => ({ ...r.profile, ...r.answers[evId] }))
+      .sort((a, b) => (a.status === b.status ? (a.dept || "").localeCompare(b.dept || "") || (a.name || "").localeCompare(b.name || "") : a.status === "참석" ? -1 : 1));
+  }
+
+  function renderResults() {
+    chips($("filter-results"), state.fRes, (t) => { state.fRes = t; renderResults(); });
+    const evs = sortedEvents().filter((e) => state.fRes === "전체" || e.type === state.fRes);
+    const sum = $("sum-list");
+    if (!state.events.length) {
+      sum.innerHTML = `<div class="empty"><strong>집계할 일정이 없습니다</strong>일정 관리 탭에서 일정을 등록하면 응답이 들어오는 대로 이곳에 집계됩니다.</div>`;
+      $("detail").hidden = true; return;
+    }
+    if (!state.selected || !state.events.some((e) => e.id === state.selected)) state.selected = (evs[0] || sortedEvents()[0]).id;
+    sum.innerHTML = evs.length ? evs.map((ev) => {
+      const c = counts(ev.id); const w = c.t || 1;
+      return `<button type="button" class="sum-row" data-id="${esc(ev.id)}" aria-pressed="${ev.id === state.selected}">
+        <span class="t"><b>[${esc(ev.type)}] ${esc(ev.title)}</b><small>${fmtDate(ev.date)} ${esc(ev.start)} · ${esc(ev.place)}</small></span>
+        <span class="bar" aria-hidden="true"><i class="y" style="width:${(c.y / w) * 100}%"></i><i class="n" style="width:${(c.n / w) * 100}%"></i></span>
+        <span class="nums"><span class="y">${c.y}</span> / <span class="n">${c.n}</span> · 계 ${c.t}</span>
+      </button>`;
+    }).join("") : `<div class="empty">${esc(state.fRes)} 일정이 없습니다.</div>`;
+    sum.querySelectorAll(".sum-row").forEach((b) => b.addEventListener("click", () => { state.selected = b.dataset.id; renderResults(); }));
+
+    const ev = state.events.find((e) => e.id === state.selected);
+    const det = $("detail"); det.hidden = false;
+    const rows = rowsFor(ev.id); const c = counts(ev.id);
+    const commented = rows.filter((r) => r.comment).length;
+    det.innerHTML = `
+      <div class="panel-head"><h2>[${esc(ev.type)}] ${esc(ev.title)}</h2><span class="hint">${fmtDate(ev.date)} ${esc(timeText(ev))} · ${esc(ev.place)}</span></div>
+      <div class="stats">
+        <div class="stat"><span>응답 인원</span><b>${c.t}</b></div>
+        <div class="stat y"><span>참석</span><b>${c.y}</b></div>
+        <div class="stat n"><span>불참</span><b>${c.n}</b></div>
+        <div class="stat"><span>의견 작성</span><b>${commented}</b></div>
+      </div>
+      ${rows.length ? `<div class="tbl-wrap"><table id="detail-table">
+        <thead><tr><th>번호</th><th>성명</th><th>소속</th><th>직위</th><th>연락처</th><th>응답</th><th>의견</th><th>회신 일시</th></tr></thead>
+        <tbody>${rows.map((r, i) => `<tr>
+          <td class="num">${i + 1}</td><td>${esc(r.name)}</td><td>${esc(r.dept)}</td><td>${esc(r.pos)}</td><td class="num">${esc(r.phone)}</td>
+          <td><span class="pill ${r.status === "참석" ? "yes" : "no"}">${esc(r.status)}</span></td>
+          <td>${esc(r.comment) || '<span class="hint">—</span>'}</td><td class="num">${fmtStamp(r.at)}</td></tr>`).join("")}</tbody>
+      </table></div>` : `<div class="empty"><strong>아직 회신이 없습니다</strong>교원이 응답을 제출하면 성명·소속·직위·의견과 함께 이 표에 표시됩니다.</div>`}`;
+  }
+
+  function csvAll() {
+    const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const lines = [["구분", "명칭", "날짜", "시간", "장소", "성명", "소속", "직위", "연락처", "응답", "의견", "회신일시"].map(q).join(",")];
+    sortedEvents().forEach((ev) => rowsFor(ev.id).forEach((r) => lines.push(
+      [ev.type, ev.title, ev.date, timeText(ev), ev.place, r.name, r.dept, r.pos, r.phone, r.status, r.comment, r.at ? new Date(r.at).toLocaleString("ko-KR") : ""].map(q).join(","))));
+    return "﻿" + lines.join("\r\n");
+  }
+  $("csv-btn").addEventListener("click", async () => {
+    const dl = await claude.use("downloads");
+    if (!dl) return toast("이 화면에서는 파일 저장을 쓸 수 없습니다. '표 복사'를 이용해 주세요.");
+    try { await dl.save({ filename: `교원참석확인_${today()}.csv`, data: csvAll() }); toast("CSV 파일을 저장했습니다."); }
+    catch (e) { if (e?.code !== "declined") toast("파일을 저장하지 못했습니다."); }
+  });
+  $("copy-btn").addEventListener("click", async () => {
+    const ev = state.events.find((e) => e.id === state.selected); if (!ev) return;
+    const text = [["성명", "소속", "직위", "연락처", "응답", "의견", "회신일시"].join("\t"),
+      ...rowsFor(ev.id).map((r) => [r.name, r.dept, r.pos, r.phone, r.status, (r.comment || "").replace(/\s+/g, " "), fmtStamp(r.at)].join("\t"))].join("\n");
+    try { await navigator.clipboard.writeText(text); toast("선택한 일정의 표를 복사했습니다. 엑셀에 붙여넣을 수 있습니다."); }
+    catch (e) {
+      const t = $("detail-table"); if (!t) return;
+      const r = document.createRange(); r.selectNodeContents(t); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      toast("표를 선택했습니다. Ctrl+C로 복사해 주세요.");
+    }
+  });
+
+  /* ---------- render & boot ---------- */
+  function render() {
+    if (state.tab === "respond") { fillProfile(); renderRespond(); }
+    else if (state.tab === "manage") renderManage();
+    else renderResults();
+  }
+
+  async function boot() {
+    render();
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    state.db = db; state.user = user;
+    if (!db) { $("offline").hidden = false; $("who").textContent = "로그인 후 이용할 수 있습니다"; return; }
+    const [me, uid, admin, canW] = user ? await Promise.all([user.me(), user.id(), user.canEdit(), user.can("data.write")]) : [null, null, false, null];
+    state.uid = uid; state.admin = !!admin; state.canWrite = canW !== false;
+    $("who").innerHTML = `<b>${esc(me?.name || "접속자")}</b><span class="role">${state.admin ? "행정실(관리자)" : "교원"}</span>`;
+    if (state.admin) { $("tab-manage").hidden = false; $("tab-results").hidden = false; }
+    if (me?.name && !$("p-name").value) $("p-name").value = me.name;
+
+    db.collection("events").onSnapshot((snap) => {
+      state.events = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      render();
+    }, () => toast("일정 목록을 불러오지 못했습니다. 페이지를 새로 고쳐 주세요."));
+
+    if (uid) db.doc("responses/" + uid).onSnapshot((snap) => {
+      state.mine = snap.exists ? snap.data() : null;
+      render();
+    });
+    if (state.admin) db.collection("responses").onSnapshot((snap) => {
+      state.all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      render();
+    });
+
+    let saved = null; try { saved = localStorage.getItem("att-tab"); } catch (e) {}
+    const hash = location.hash.replace("#", "");
+    const want = ["respond", "manage", "results"].includes(hash) ? hash : saved;
+    if (want && (want === "respond" || state.admin)) setTab(want);
+  }
+  boot();
+})();
+</script>
