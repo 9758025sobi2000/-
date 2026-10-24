@@ -178,6 +178,7 @@ tr:last-child td { border-bottom: 0; }
       <h2>응답할 일정</h2>
       <div class="row">
         <div class="chips" id="filter-respond" role="group" aria-label="구분 필터"></div>
+        <span class="saved" id="last-sync" title="1분마다 자동으로 새 일정을 불러옵니다"></span>
         <button type="button" class="btn small" id="refresh-respond">새로 고침</button>
       </div>
     </div>
@@ -291,24 +292,36 @@ tr:last-child td { border-bottom: 0; }
   }
 
   /* ---------- 응답자 데이터 ---------- */
-  async function loadBoard() {
+  let loading = false;
+  async function loadBoard(auto) {
+    if (loading) return;
+    loading = true;
     try {
       const res = await call("api_getBoard", KEY);
       state.events = res.events; state.me = res.me; state.today = res.today;
       showError("");
-      fillProfile(true);
+      fillProfile(false);
+      const d = new Date();
+      $("last-sync").textContent = `최근 갱신 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
       render();
     } catch (e) {
+      if (auto) return; // 자동 갱신 실패는 화면을 그대로 두고 다음 주기에 다시 시도
       showError(errMsg(e));
       $("respond-list").innerHTML = `<div class="empty"><strong>일정을 불러오지 못했습니다</strong>[새로 고침]을 눌러 다시 시도해 주세요.</div>`;
+    } finally {
+      loading = false;
     }
   }
-  $("refresh-respond").addEventListener("click", loadBoard);
+  $("refresh-respond").addEventListener("click", () => loadBoard(false));
+
+  // 저장하지 않은 인적사항 입력은 자동 갱신이 덮어쓰지 않도록 표시해 둠
+  let profileDirty = false;
+  $("profile-form").addEventListener("input", () => { profileDirty = true; });
 
   function fillProfile(force) {
     const p = state.me.profile;
     if (!p) return;
-    if (!force && document.activeElement?.closest("#profile-form")) return;
+    if (!force && (profileDirty || document.activeElement?.closest("#profile-form"))) return;
     $("p-name").value = p.name || ""; $("p-dept").value = p.dept || "";
     $("p-category").value = p.category || ""; $("p-role").value = p.roleTitle || ""; $("p-phone").value = p.phone || "";
     $("profile-saved").textContent = p.updatedAt ? `저장됨 ${fmtStamp(p.updatedAt)}` : "";
@@ -323,7 +336,7 @@ tr:last-child td { border-bottom: 0; }
     if (!profile.name || !profile.dept) return toast("성명과 소속 부서(학과)를 입력해 주세요.");
     if (!profile.category) return toast("구분을 선택해 주세요.");
     $("p-save").disabled = true;
-    try { state.me = await call("api_saveProfile", KEY, profile); fillProfile(true); toast("인적사항을 저장했습니다."); render(); }
+    try { state.me = await call("api_saveProfile", KEY, profile); profileDirty = false; fillProfile(true); toast("인적사항을 저장했습니다."); render(); }
     catch (err) { toast(errMsg(err)); }
     finally { $("p-save").disabled = false; }
   });
@@ -606,6 +619,8 @@ tr:last-child td { border-bottom: 0; }
 
   // 관리자가 결과 화면을 보고 있으면 1분마다 새 응답을 반영
   setInterval(() => { if (state.admin && state.tab === "results" && !document.hidden) loadAdmin(); }, 60000);
+  // 응답 화면은 1분마다 새 일정과 마감 상태를 불러옴 (입력 중인 의견·선택은 유지)
+  setInterval(() => { if (state.tab === "respond" && !document.hidden) loadBoard(true); }, 60000);
 
   loadBoard();
 })();

@@ -55,6 +55,14 @@ function setup() {
     sh.setFrozenRows(1);
     Object.keys(def.notes || {}).forEach((col) => sh.getRange(1, Number(col)).setNote(def.notes[col]));
   });
+  // 일정 시트의 구분 칸은 회의/행사/출장 중에서만 고르게 함
+  const evSheet = ss.getSheetByName(SHEETS.events.name);
+  evSheet.getRange(2, 2, evSheet.getMaxRows() - 1, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation()
+      .requireValueInList(EVENT_TYPES, true)
+      .setAllowInvalid(false)
+      .setHelpText('회의, 행사, 출장 중에서 고르세요.')
+      .build());
   const blank = ss.getSheetByName('시트1') || ss.getSheetByName('Sheet1');
   if (blank && blank.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(blank);
   const msg = hasPassword_()
