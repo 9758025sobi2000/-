@@ -161,7 +161,7 @@ tr:last-child td { border-bottom: 0; }
       <p class="hint">한 번 저장하면 모든 응답에 함께 기록됩니다. 성명, 소속, 구분은 필수입니다.</p>
       <div class="grid profile-grid">
         <label class="f"><span>성명 <span class="req" aria-hidden="true">*</span></span><input id="p-name" name="name" required maxlength="30" placeholder="홍길동"></label>
-        <label class="f"><span>소속 부서(학과) <span class="req" aria-hidden="true">*</span></span><input id="p-dept" name="dept" required maxlength="40" placeholder="예: 기계공학과"></label>
+        <label class="f"><span>소속 부서(학과) <span class="req" aria-hidden="true">*</span></span><input id="p-dept" name="dept" required maxlength="40" placeholder="예: 학생처, 기계공학과"></label>
         <label class="f"><span>구분 <span class="req" aria-hidden="true">*</span></span>
           <select id="p-category" name="category" required>
             <option value="">선택</option>
@@ -523,7 +523,7 @@ tr:last-child td { border-bottom: 0; }
         <div class="stat"><span>의견 작성</span><b>${commented}</b></div>
       </div>
       ${rows.length ? `<div class="tbl-wrap"><table id="detail-table">
-        <thead><tr><th>번호</th><th>성명</th><th>소속</th><th>구분</th><th>보직명</th><th>연락처</th><th>응답</th><th>의견</th><th>회신 일시</th></tr></thead>
+        <thead><tr><th>번호</th><th>성명</th><th>소속 부서(학과)</th><th>구분</th><th>보직명</th><th>연락처</th><th>응답</th><th>의견</th><th>회신 일시</th></tr></thead>
         <tbody>${rows.map((r, i) => `<tr>
           <td class="num">${i + 1}</td><td>${esc(r.name)}</td><td>${esc(r.dept)}</td><td>${esc(r.category)}</td><td>${esc(r.roleTitle || r.pos)}</td><td class="num">${esc(r.phone)}</td>
           <td><span class="pill ${r.status === "참석" ? "yes" : "no"}">${esc(r.status)}</span></td>
@@ -533,7 +533,7 @@ tr:last-child td { border-bottom: 0; }
 
   function csvAll() {
     const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-    const lines = [["구분", "명칭", "날짜", "시간", "장소", "성명", "소속", "응답자구분", "보직명", "연락처", "응답", "의견", "회신일시"].map(q).join(",")];
+    const lines = [["구분", "명칭", "날짜", "시간", "장소", "성명", "소속 부서(학과)", "응답자구분", "보직명", "연락처", "응답", "의견", "회신일시"].map(q).join(",")];
     sortedEvents().forEach((ev) => rowsFor(ev.id).forEach((r) => lines.push(
       [ev.type, ev.title, ev.date, timeText(ev), ev.place, r.name, r.dept, r.category, r.roleTitle || r.pos, r.phone, r.status, r.comment, r.at ? new Date(r.at).toLocaleString("ko-KR") : ""].map(q).join(","))));
     return "﻿" + lines.join("\r\n");
@@ -546,7 +546,7 @@ tr:last-child td { border-bottom: 0; }
   });
   $("copy-btn").addEventListener("click", async () => {
     const ev = state.events.find((e) => e.id === state.selected); if (!ev) return;
-    const text = [["성명", "소속", "구분", "보직명", "연락처", "응답", "의견", "회신일시"].join("\t"),
+    const text = [["성명", "소속 부서(학과)", "구분", "보직명", "연락처", "응답", "의견", "회신일시"].join("\t"),
       ...rowsFor(ev.id).map((r) => [r.name, r.dept, r.category, r.roleTitle || r.pos, r.phone, r.status, (r.comment || "").replace(/\s+/g, " "), fmtStamp(r.at)].join("\t"))].join("\n");
     try { await navigator.clipboard.writeText(text); toast("선택한 일정의 표를 복사했습니다. 엑셀에 붙여넣을 수 있습니다."); }
     catch (e) {
