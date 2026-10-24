@@ -74,7 +74,7 @@ function setAdminPassword() {
 
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('index')
-    .setTitle('교원 참석 확인')
+    .setTitle('회의 참석 확인')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
