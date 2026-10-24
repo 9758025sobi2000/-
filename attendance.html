@@ -1,4 +1,4 @@
-<title>교원 참석 확인</title>
+<title>회의 등 참석자 확인</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -159,8 +159,8 @@ tr:last-child td { border-bottom: 0; }
       </div>
       <p class="hint">한 번 저장하면 모든 응답에 함께 기록됩니다. 성명과 소속은 필수입니다.</p>
       <div class="grid">
-        <label class="f">성명 <span class="req" aria-hidden="true">*</span><input id="p-name" name="name" required maxlength="30" placeholder="홍길동"></label>
-        <label class="f">소속 학과(전공) <span class="req" aria-hidden="true">*</span><input id="p-dept" name="dept" required maxlength="40" placeholder="예: 기계공학과"></label>
+        <label class="f"><span>성명 <span class="req" aria-hidden="true">*</span></span><input id="p-name" name="name" required maxlength="30" placeholder="홍길동"></label>
+        <label class="f"><span>소속 학과(전공) <span class="req" aria-hidden="true">*</span></span><input id="p-dept" name="dept" required maxlength="40" placeholder="예: 기계공학과"></label>
         <label class="f">직위
           <select id="p-pos" name="pos">
             <option value="">선택</option>
@@ -189,15 +189,15 @@ tr:last-child td { border-bottom: 0; }
         <button type="button" class="btn small" id="ev-cancel" hidden>수정 취소</button>
       </div>
       <div class="grid">
-        <label class="f">구분 <span class="req" aria-hidden="true">*</span>
+        <label class="f"><span>구분 <span class="req" aria-hidden="true">*</span></span>
           <select id="ev-type" required><option>회의</option><option>행사</option><option>출장</option></select>
         </label>
-        <label class="f span2">명칭 <span class="req" aria-hidden="true">*</span><input id="ev-title" required maxlength="80" placeholder="예: 2026학년도 2학기 제3차 교수회의"></label>
-        <label class="f">날짜 <span class="req" aria-hidden="true">*</span><input id="ev-date" type="date" required></label>
-        <label class="f">시작 시간 <span class="req" aria-hidden="true">*</span><input id="ev-start" type="time" required></label>
+        <label class="f span2"><span>명칭 <span class="req" aria-hidden="true">*</span></span><input id="ev-title" required maxlength="80" placeholder="예: 2026학년도 2학기 제3차 교수회의"></label>
+        <label class="f"><span>날짜 <span class="req" aria-hidden="true">*</span></span><input id="ev-date" type="date" required></label>
+        <label class="f"><span>시작 시간 <span class="req" aria-hidden="true">*</span></span><input id="ev-start" type="time" required></label>
         <label class="f">종료 시간<input id="ev-end" type="time"></label>
         <label class="f">회신 기한<input id="ev-deadline" type="date"></label>
-        <label class="f span2">장소 <span class="req" aria-hidden="true">*</span><input id="ev-place" required maxlength="80" placeholder="예: 공학관 3층 대회의실 / 세종컨벤션센터"></label>
+        <label class="f span2"><span>장소 <span class="req" aria-hidden="true">*</span></span><input id="ev-place" required maxlength="80" placeholder="예: 공학관 3층 대회의실 / 세종컨벤션센터"></label>
         <label class="f span2">안내 사항<textarea id="ev-note" maxlength="500" placeholder="준비물, 복장, 출장비 정산 안내 등"></textarea></label>
       </div>
       <div class="row"><button class="btn primary" type="submit" id="ev-save">일정 등록</button></div>
