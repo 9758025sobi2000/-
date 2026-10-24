@@ -1,5 +1,5 @@
 /**
- * 교원 참석 확인 — Google Apps Script 웹앱 서버 코드
+ * 일정 참석 회신 — Google Apps Script 웹앱 서버 코드
  *
  * 응답자는 로그인 없이 웹앱 링크로 응답하고, 모든 데이터는 이 스크립트가 연결된
  * 스프레드시트의 '일정', '응답자', '응답' 시트에 저장됩니다.
@@ -74,7 +74,7 @@ function setAdminPassword() {
 
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('index')
-    .setTitle('회의 참석 확인')
+    .setTitle('일정 참석 회신')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
