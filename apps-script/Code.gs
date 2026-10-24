@@ -241,7 +241,7 @@ function cleanProfile_(p) {
     name: clean_(p.name, 30), dept: clean_(p.dept, 40), category: clean_(p.category, 10),
     roleTitle: clean_(p.roleTitle, 40), phone: clean_(p.phone, 20),
   };
-  if (!out.name || !out.dept) throw new Error('성명과 소속을 입력해 주세요.');
+  if (!out.name || !out.dept) throw new Error('성명과 소속 부서(학과)를 입력해 주세요.');
   if (CATEGORIES.indexOf(out.category) < 0) throw new Error('구분을 선택해 주세요.');
   return out;
 }

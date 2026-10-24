@@ -157,7 +157,7 @@ tr:last-child td { border-bottom: 0; }
         <h2>응답자 인적사항</h2>
         <span class="saved" id="profile-saved"></span>
       </div>
-      <p class="hint">한 번 저장하면 모든 응답에 함께 기록됩니다. 성명, 소속, 구분은 필수입니다.</p>
+      <p class="hint">한 번 저장하면 모든 응답에 함께 기록됩니다. 성명, 소속 부서(학과), 구분은 필수입니다.</p>
       <div class="grid profile-grid">
         <label class="f"><span>성명 <span class="req" aria-hidden="true">*</span></span><input id="p-name" name="name" required maxlength="30" placeholder="홍길동"></label>
         <label class="f"><span>소속 부서(학과) <span class="req" aria-hidden="true">*</span></span><input id="p-dept" name="dept" required maxlength="40" placeholder="예: 학생처, 기계공학과"></label>
@@ -258,7 +258,7 @@ tr:last-child td { border-bottom: 0; }
   const state = {
     events: [], me: { profile: null, answers: {} }, today: "",
     admin: null, all: [], sheetUrl: "",
-    tab: "respond", fResp: "전체", fRes: "전체", selected: null,
+    tab: "respond", fResp: "전체", fRes: "전체", fCat: "전체", selected: null,
     drafts: {}, editing: null, confirmDel: null, busy: false,
   };
 
@@ -285,8 +285,8 @@ tr:last-child td { border-bottom: 0; }
   }
   document.querySelectorAll("nav.tabs button").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.tab)));
 
-  function chips(el, current, onPick) {
-    el.innerHTML = ["전체", ...TYPES].map((t) => `<button type="button" class="chip" aria-pressed="${t === current}" data-t="${t}">${t}</button>`).join("");
+  function chips(el, current, onPick, list = TYPES) {
+    el.innerHTML = ["전체", ...list].map((t) => `<button type="button" class="chip" aria-pressed="${t === current}" data-t="${t}">${t}</button>`).join("");
     el.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => onPick(b.dataset.t)));
   }
 
@@ -320,7 +320,7 @@ tr:last-child td { border-bottom: 0; }
       name: $("p-name").value.trim(), dept: $("p-dept").value.trim(), category: $("p-category").value,
       roleTitle: $("p-role").value.trim(), phone: $("p-phone").value.trim(),
     };
-    if (!profile.name || !profile.dept) return toast("성명과 소속을 입력해 주세요.");
+    if (!profile.name || !profile.dept) return toast("성명과 소속 부서(학과)를 입력해 주세요.");
     if (!profile.category) return toast("구분을 선택해 주세요.");
     $("p-save").disabled = true;
     try { state.me = await call("api_saveProfile", KEY, profile); fillProfile(true); toast("인적사항을 저장했습니다."); render(); }
@@ -387,7 +387,7 @@ tr:last-child td { border-bottom: 0; }
   }
 
   async function submitAnswer(id, ta, btn) {
-    if (!state.me.profile) { toast("먼저 인적사항(성명·소속·구분)을 저장해 주세요."); $("p-name").focus(); return; }
+    if (!state.me.profile) { toast("먼저 인적사항(성명·소속 부서(학과)·구분)을 저장해 주세요."); $("p-name").focus(); return; }
     const status = state.drafts[id]?.status ?? state.me.answers[id]?.status;
     if (!status) return toast("참석 또는 불참을 선택해 주세요.");
     btn.disabled = true; btn.textContent = "저장 중…";
@@ -536,6 +536,8 @@ tr:last-child td { border-bottom: 0; }
       (a.dept || "").localeCompare(b.dept || "") || (a.name || "").localeCompare(b.name || ""));
   }
 
+  const visibleRows = (evId) => rowsFor(evId).filter((r) => state.fCat === "전체" || r.category === state.fCat);
+
   function renderResults() {
     chips($("filter-results"), state.fRes, (t) => { state.fRes = t; renderResults(); });
     const link = $("sheet-link");
@@ -559,11 +561,13 @@ tr:last-child td { border-bottom: 0; }
 
     const ev = state.events.find((e) => e.id === state.selected);
     det.hidden = false;
-    const rows = rowsFor(ev.id); const c = counts(ev.id);
+    const all = rowsFor(ev.id); const rows = visibleRows(ev.id);
+    const c = { y: rows.filter((r) => r.status === "참석").length, n: rows.filter((r) => r.status === "불참").length }; c.t = c.y + c.n;
     const commented = rows.filter((r) => r.comment).length;
     const byCat = CATEGORIES.map((cat) => [cat, rows.filter((r) => r.category === cat && r.status === "참석").length]).filter(([, n]) => n);
     det.innerHTML = `
       <div class="panel-head"><h2>[${esc(ev.type)}] ${esc(ev.title)}</h2><span class="hint">${fmtDate(ev.date)} ${esc(timeText(ev))} · ${esc(ev.place)}</span></div>
+      <div class="row"><span class="hint">응답자 구분</span><div class="chips" id="filter-cat" role="group" aria-label="응답자 구분 필터"></div></div>
       <div class="stats">
         <div class="stat"><span>응답 인원</span><b>${c.t}</b></div>
         <div class="stat y"><span>참석</span><b>${c.y}</b></div>
@@ -577,13 +581,14 @@ tr:last-child td { border-bottom: 0; }
           <td class="num">${i + 1}</td><td>${esc(r.name)}</td><td>${esc(r.dept)}</td><td>${esc(r.category)}</td><td>${esc(r.roleTitle)}</td><td class="num">${esc(r.phone)}</td>
           <td><span class="pill ${r.status === "참석" ? "yes" : "no"}">${esc(r.status)}</span></td>
           <td>${esc(r.comment) || '<span class="hint">—</span>'}</td><td class="num">${esc(fmtStamp(r.at))}</td></tr>`).join("")}</tbody>
-      </table></div>` : `<div class="empty"><strong>아직 회신이 없습니다</strong>응답이 제출되면 성명·소속·구분·보직명·의견과 함께 이 표에 표시됩니다.</div>`}`;
+      </table></div>` : all.length ? `<div class="empty"><strong>${esc(state.fCat)} 응답자가 없습니다</strong>다른 구분을 선택해 보세요.</div>` : `<div class="empty"><strong>아직 회신이 없습니다</strong>응답이 제출되면 성명·소속 부서(학과)·구분·보직명·의견과 함께 이 표에 표시됩니다.</div>`}`;
+    chips($("filter-cat"), state.fCat, (t) => { state.fCat = t; renderResults(); }, CATEGORIES);
   }
 
   $("copy-btn").addEventListener("click", async () => {
     const ev = state.events.find((e) => e.id === state.selected); if (!ev) return;
     const text = [["성명", "소속 부서(학과)", "구분", "보직명", "연락처", "응답", "의견", "회신일시"].join("\t"),
-      ...rowsFor(ev.id).map((r) => [r.name, r.dept, r.category, r.roleTitle, r.phone, r.status, (r.comment || "").replace(/\s+/g, " "), r.at].join("\t"))].join("\n");
+      ...visibleRows(ev.id).map((r) => [r.name, r.dept, r.category, r.roleTitle, r.phone, r.status, (r.comment || "").replace(/\s+/g, " "), r.at].join("\t"))].join("\n");
     try { await navigator.clipboard.writeText(text); toast("선택한 일정의 표를 복사했습니다. 엑셀에 붙여넣을 수 있습니다."); }
     catch (e) {
       const t = $("detail-table"); if (!t) return;
