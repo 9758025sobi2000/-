@@ -27,7 +27,7 @@ const SHEETS = {
   },
 };
 
-const EVENT_TYPES = ['회의', '행사', '출장'];
+const EVENT_TYPES = ['회의', '행사', '출장', '교육'];
 const CATEGORIES = ['교원', '직원', '조교', '학생', '외부', '기타'];
 const STATUSES = ['참석', '불참'];
 const KEY_PATTERN = /^[A-Za-z0-9_-]{16,64}$/;
@@ -61,7 +61,7 @@ function setup() {
     SpreadsheetApp.newDataValidation()
       .requireValueInList(EVENT_TYPES, true)
       .setAllowInvalid(false)
-      .setHelpText('회의, 행사, 출장 중에서 고르세요.')
+      .setHelpText('회의, 행사, 출장, 교육 중에서 고르세요.')
       .build());
   const blank = ss.getSheetByName('시트1') || ss.getSheetByName('Sheet1');
   if (blank && blank.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(blank);

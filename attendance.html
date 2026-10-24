@@ -22,7 +22,7 @@
   --warn-soft: #fbefd5;
   --t-meet: #1d4f86;
   --t-event: #7a3f8f;
-  --t-trip: #2c6e6a;
+  --t-trip: #2c6e6a; --t-edu: #95540f;
   --f-display: "Noto Serif KR", "Nanum Myeongjo", serif;
   --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -32,7 +32,7 @@
     --bg: #11161d; --surface: #19212b; --sunken: #222c38; --ink: #e6ebf1; --muted: #9aa8b8; --line: #2f3b49;
     --accent: #7fb0e6; --accent-soft: #1f3247; --on-accent: #0d1620;
     --yes: #6fd19e; --yes-soft: #173528; --no: #f08c8c; --no-soft: #3d1f22; --warn: #e8bd6a; --warn-soft: #3a2e15;
-    --t-meet: #7fb0e6; --t-event: #cf9ae0; --t-trip: #7fcfc8;
+    --t-meet: #7fb0e6; --t-event: #cf9ae0; --t-trip: #7fcfc8; --t-edu: #e8b56f;
     color-scheme: dark;
   }
 }
@@ -40,7 +40,7 @@
   --bg: #11161d; --surface: #19212b; --sunken: #222c38; --ink: #e6ebf1; --muted: #9aa8b8; --line: #2f3b49;
   --accent: #7fb0e6; --accent-soft: #1f3247; --on-accent: #0d1620;
   --yes: #6fd19e; --yes-soft: #173528; --no: #f08c8c; --no-soft: #3d1f22; --warn: #e8bd6a; --warn-soft: #3a2e15;
-  --t-meet: #7fb0e6; --t-event: #cf9ae0; --t-trip: #7fcfc8;
+  --t-meet: #7fb0e6; --t-event: #cf9ae0; --t-trip: #7fcfc8; --t-edu: #e8b56f;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -81,6 +81,7 @@ textarea { resize: vertical; min-height: 64px; }
 .ev[data-type="회의"] { --tc: var(--t-meet); }
 .ev[data-type="행사"] { --tc: var(--t-event); }
 .ev[data-type="출장"] { --tc: var(--t-trip); }
+.ev[data-type="교육"] { --tc: var(--t-edu); }
 .ev-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; justify-content: space-between; }
 .type { font-size: 12px; font-weight: 700; color: var(--tc); border: 1px solid var(--tc); border-radius: 4px; padding: 0 6px; margin-right: 8px; }
 .ev h3 { margin: 0; font-size: 17px; display: inline; }
@@ -191,7 +192,7 @@ tr:last-child td { border-bottom: 0; }
       </div>
       <div class="grid">
         <label class="f"><span>구분 <span class="req" aria-hidden="true">*</span></span>
-          <select id="ev-type" required><option>회의</option><option>행사</option><option>출장</option></select>
+          <select id="ev-type" required><option>회의</option><option>행사</option><option>출장</option><option>교육</option></select>
         </label>
         <label class="f span2"><span>명칭 <span class="req" aria-hidden="true">*</span></span><input id="ev-title" required maxlength="80" placeholder="예: 2026학년도 2학기 제3차 교수회의"></label>
         <label class="f"><span>날짜 <span class="req" aria-hidden="true">*</span></span><input id="ev-date" type="date" required></label>
@@ -228,7 +229,7 @@ tr:last-child td { border-bottom: 0; }
 
 <script>
 (() => {
-  const TYPES = ["회의", "행사", "출장"];
+  const TYPES = ["회의", "행사", "출장", "교육"];
   const CATEGORIES = ["교원", "직원", "조교", "학생", "외부", "기타"];
   const WD = ["일", "월", "화", "수", "목", "금", "토"];
   const $ = (id) => document.getElementById(id);
