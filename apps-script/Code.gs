@@ -9,15 +9,21 @@
 const SHEETS = {
   events: {
     name: '일정',
-    headers: ['ID', '구분', '명칭', '날짜', '시작', '종료', '장소', '회신기한', '안내사항', '마감', '등록일시'],
+    headers: ['ID(자동)', '구분', '명칭', '날짜', '시작', '종료', '장소', '회신기한', '안내사항', '마감(Y=수동마감)', '등록일시(자동)'],
+    notes: {
+      1: '일정을 저장하면 자동으로 채워집니다. 시트에 직접 입력한 일정도 웹앱을 열 때 자동으로 부여됩니다.',
+      8: '응답을 받는 마지막 날짜 (예: 2026-10-30). 다음 날부터 응답이 자동으로 잠깁니다.',
+      10: '지금 바로 응답을 닫으려면 Y를 입력합니다. 웹앱의 [회신 마감] 버튼을 누르면 자동으로 입력됩니다.',
+      11: '처음 저장된 시각이 자동으로 기록됩니다.',
+    },
   },
   people: {
     name: '응답자',
-    headers: ['응답자키', '성명', '소속 부서(학과)', '구분', '보직명', '연락처', '저장일시'],
+    headers: ['응답자키(자동)', '성명', '소속 부서(학과)', '구분', '보직명', '연락처', '저장일시'],
   },
   answers: {
     name: '응답',
-    headers: ['일정ID', '응답자키', '일정명', '성명', '소속 부서(학과)', '구분', '보직명', '연락처', '응답', '의견', '회신일시'],
+    headers: ['일정ID(자동)', '응답자키(자동)', '일정명', '성명', '소속 부서(학과)', '구분', '보직명', '연락처', '응답', '의견', '회신일시'],
   },
 };
 
@@ -47,6 +53,7 @@ function setup() {
     sh.getRange(1, 1, sh.getMaxRows(), def.headers.length).setNumberFormat('@');
     sh.getRange(1, 1, 1, def.headers.length).setValues([def.headers]).setFontWeight('bold');
     sh.setFrozenRows(1);
+    Object.keys(def.notes || {}).forEach((col) => sh.getRange(1, Number(col)).setNote(def.notes[col]));
   });
   const blank = ss.getSheetByName('시트1') || ss.getSheetByName('Sheet1');
   if (blank && blank.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(blank);
@@ -147,7 +154,7 @@ function api_adminSaveEvent(pw, input) {
       const row = findRow_(sh, SHEETS.events, (r) => r[0] === input.id);
       if (!row) throw new Error('수정할 일정을 찾지 못했습니다. 새로 고침해 주세요.');
       const cur = sh.getRange(row, 1, 1, SHEETS.events.headers.length).getDisplayValues()[0];
-      writeRow_(sh, row, [cur[0], ev.type, ev.title, ev.date, ev.start, ev.end, ev.place, ev.deadline, ev.note, cur[9], cur[10]]);
+      writeRow_(sh, row, [cur[0], ev.type, ev.title, ev.date, ev.start, ev.end, ev.place, ev.deadline, ev.note, isYes_(cur[9]) ? 'Y' : '', cur[10] || stamp_()]);
     } else {
       writeRow_(sh, sh.getLastRow() + 1, [Utilities.getUuid(), ev.type, ev.title, ev.date, ev.start, ev.end, ev.place, ev.deadline, ev.note, '', stamp_()]);
     }
@@ -162,7 +169,7 @@ function api_adminToggleClose(pw, id) {
     const row = findRow_(sh, SHEETS.events, (r) => r[0] === id);
     if (!row) throw new Error('일정을 찾지 못했습니다.');
     const cell = sh.getRange(row, 10);
-    cell.setNumberFormat('@').setValue(cell.getDisplayValue() === 'Y' ? '' : 'Y');
+    cell.setNumberFormat('@').setValue(isYes_(cell.getDisplayValue()) ? '' : 'Y');
     return api_adminData(pw);
   });
 }
@@ -214,13 +221,63 @@ function writeRow_(sh, row, values) {
 }
 
 function readEvents_() {
+  assignMissingIds_();
   return readRows_(sheet_(SHEETS.events), SHEETS.events)
     .filter((r) => r[0])
-    .map((r) => ({
-      id: r[0], type: r[1], title: r[2], date: r[3], start: r[4], end: r[5],
-      place: r[6], deadline: r[7], note: r[8], closed: r[9] === 'Y', createdAt: r[10],
-    }))
+    .map(eventFromRow_)
+    .filter((ev) => ev.title && ev.date)
     .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+}
+
+// 시트에 직접 입력한 값(2026. 11. 5 / 오후 2:00 등)도 앱 형식으로 맞춰 읽음
+function eventFromRow_(r) {
+  let deadline = normDate_(r[7]);
+  const closedAsDate = normDate_(r[9]);
+  if (!deadline && closedAsDate) deadline = closedAsDate; // 마감 칸에 날짜를 적은 경우 회신기한으로 봄
+  return {
+    id: r[0], type: String(r[1]).trim(), title: String(r[2]).trim(), date: normDate_(r[3]),
+    start: normTime_(r[4]), end: normTime_(r[5]), place: String(r[6]).trim(), deadline: deadline,
+    note: r[8], closed: isYes_(r[9]), createdAt: r[10],
+  };
+}
+
+// 명칭과 날짜는 있는데 ID가 빈 행(시트에 직접 입력한 일정)에 ID와 등록일시를 채움
+function assignMissingIds_() {
+  const def = SHEETS.events;
+  const needsId = (r) => !r[0] && String(r[2]).trim() && normDate_(r[3]);
+  if (!readRows_(sheet_(def), def).some(needsId)) return;
+  withLock_(() => {
+    const sh = sheet_(def);
+    readRows_(sh, def).forEach((r, i) => {
+      if (!needsId(r)) return;
+      sh.getRange(i + 2, 1).setNumberFormat('@').setValue(Utilities.getUuid());
+      if (!r[10]) sh.getRange(i + 2, 11).setNumberFormat('@').setValue(stamp_());
+    });
+  });
+}
+
+function normDate_(v) {
+  const m = String(v == null ? '' : v).trim().match(/^(\d{4})\s*[-./년]\s*(\d{1,2})\s*[-./월]\s*(\d{1,2})/);
+  return m ? m[1] + '-' + pad2_(m[2]) + '-' + pad2_(m[3]) : '';
+}
+
+function normTime_(v) {
+  const s = String(v == null ? '' : v).trim();
+  const m = s.match(/(\d{1,2})\s*(?::|시)\s*(\d{1,2})?/);
+  if (!m) return '';
+  let h = Number(m[1]);
+  const min = Number(m[2] || 0);
+  if (/오후|pm/i.test(s) && h < 12) h += 12;
+  if (/오전|am/i.test(s) && h === 12) h = 0;
+  return h > 23 || min > 59 ? '' : pad2_(h) + ':' + pad2_(min);
+}
+
+function pad2_(n) {
+  return String(n).padStart(2, '0');
+}
+
+function isYes_(v) {
+  return /^(y|yes|o|예|마감|true|v|✓)$/i.test(String(v == null ? '' : v).trim());
 }
 
 function readMe_(key) {
@@ -298,12 +355,17 @@ function hash_(s) {
   return Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8));
 }
 
+let lockHeld_ = false;
+
 function withLock_(fn) {
+  if (lockHeld_) return fn(); // 이미 잠금을 잡은 호출 안에서 다시 부르는 경우
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(15000)) throw new Error('동시에 접속한 사람이 많습니다. 잠시 후 다시 시도해 주세요.');
+  lockHeld_ = true;
   try {
     return fn();
   } finally {
+    lockHeld_ = false;
     lock.releaseLock();
   }
 }
